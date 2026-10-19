@@ -11,6 +11,7 @@ A lightweight, bilingual (Arabic / English) turn-by-turn driving navigation app 
 - Place search (Photon, with Nominatim fallback) biased to your current location
 - Long-press the map to drop a pin, with reverse-geocoded address
 - Car routing with alternatives (OSRM), route picker, and "via" road names
+- 3D map: tilted, heading-up driving view and 3D buildings (MapLibre + OpenFreeMap), with an automatic flat-map fallback on devices without WebGL2
 - Turn-by-turn navigation: maneuver banner, distance to next turn, ETA / time / distance remaining
 - Voice guidance in Arabic or English (Web Speech API), with timing scaled to speed
 - Automatic rerouting when you leave the route
@@ -41,8 +42,8 @@ python3 -m http.server 8000
 
 | Concern | Service |
 | --- | --- |
-| Map rendering | [Leaflet](https://leafletjs.com) 1.9.4 |
-| Map tiles | CARTO Voyager / Dark Matter (free API key in `CARTO_KEY`), falling back to OpenStreetMap |
+| 3D map | [MapLibre GL JS](https://maplibre.org) 6 with [OpenFreeMap](https://openfreemap.org) vector tiles (Liberty / Dark) |
+| Flat map (fallback) | [Leaflet](https://leafletjs.com) 1.9.4 with CARTO Voyager / Dark Matter (key in `CARTO_KEY`), falling back to OpenStreetMap |
 | Search | [Photon](https://photon.komoot.io), fallback [Nominatim](https://nominatim.org) |
 | Routing | OSRM via routing.openstreetmap.de, fallback router.project-osrm.org |
 | Speed limits, nearby places | Overpass API |
@@ -50,7 +51,7 @@ python3 -m http.server 8000
 | Accounts, traffic, shared reports | [Supabase](https://supabase.com) (Postgres + Auth), schema in `supabase/schema.sql` |
 | Android app | [Capacitor](https://capacitorjs.com) 8, built by GitHub Actions |
 
-Leaflet, Tabler Icons and supabase-js are bundled in `vendor/`, so the app shell works offline. The map, search, routing and Overpass services are free public services with fair-use limits; heavy use should move to self-hosted or paid equivalents.
+MapLibre, Leaflet, Tabler Icons and supabase-js are bundled in `vendor/`, so the app shell works offline. The map, search, routing and Overpass services are free public services with fair-use limits; heavy use should move to self-hosted or paid equivalents.
 
 Settings, saved places, recents and device-only reports live in `localStorage` under the `darb.` prefix.
 

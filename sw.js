@@ -1,7 +1,7 @@
 // Darb service worker: keeps the app shell and its bundled libraries (vendor/) available offline.
 // Map tiles, search, routing, Overpass and Supabase requests are not intercepted; they always go to the network.
 // Bump VERSION whenever this file or the precache list changes.
-const VERSION = 'darb-v2';
+const VERSION = 'darb-v3';
 
 const SHELL = [
   './',
@@ -13,7 +13,12 @@ const SHELL = [
   './vendor/leaflet/leaflet.js',
   './vendor/tabler/tabler-icons.min.css',
   './vendor/tabler/fonts/tabler-icons.woff2',
-  './vendor/supabase/supabase.js'
+  './vendor/supabase/supabase.js',
+  './vendor/maplibre/maplibre-gl.css',
+  './vendor/maplibre/maplibre-gl.mjs',
+  // MapLibre requests its worker with ?v=<version>; precache that exact URL.
+  './vendor/maplibre/maplibre-gl-worker.mjs?v=6.15.0',
+  './vendor/maplibre/mapbox-gl-rtl-text.js'
 ];
 
 self.addEventListener('install', e => {

@@ -1,6 +1,6 @@
 # Darb — development notes
 
-Web app: all HTML, CSS and JS is in `index.html` (no build step for the website), plus PWA files (`manifest.webmanifest`, `sw.js`, `icons/`) and bundled libraries in `vendor/` (Leaflet 1.9.4, Tabler Icons webfont 3.49 — woff2 only, supabase-js 2.118 UMD). Deployed by GitHub Pages from the `main` branch root.
+Web app: all HTML, CSS and JS is in `index.html` (no build step for the website), plus PWA files (`manifest.webmanifest`, `sw.js`, `icons/`) and bundled libraries in `vendor/` (MapLibre GL JS 6.15 ESM + worker + mapbox-gl-rtl-text 0.3.0, Leaflet 1.9.4, Tabler Icons webfont 3.49 — woff2 only, supabase-js 2.118 UMD). Deployed by GitHub Pages from the `main` branch root.
 
 The same `index.html` is packaged as an Android APK with Capacitor 8 (`android/`, `capacitor.config.json`, `scripts/build-www.mjs`) and an optional Supabase backend (`supabase/schema.sql`). User-facing setup steps are in `SETUP.md`.
 
@@ -9,8 +9,12 @@ The same `index.html` is packaged as an Android APK with Capacitor 8 (`android/`
 - **Storage** — `LS` wraps `localStorage` with the `darb.` prefix. `S` = settings (`lang`, `voice`, `night`), `P` = places (`home`, `work`, `favs`), plus `recents` and `reports`.
 - **i18n** — `I18N.en` / `I18N.ar`, read through `t(key, ...args)`. Some entries are functions. Every user-facing string must exist in both languages. `AR()` checks the current language; `applyLang()` sets `dir="rtl"` and refreshes `[data-t]` / `[data-tp]` elements.
 - **Geo helpers** — `dist` (haversine, metres), `bearing`, `projSeg` (project point onto segment).
-- **Map** — Leaflet; tile layers in `LAYERS`: CARTO Voyager (day) / Dark Matter (night), with OSM as fallback after repeated tile errors. CARTO requires an API key (`CARTO_KEY`, appended as `?key=`) and watermarks tiles without one; an empty `CARTO_KEY` means OSM only. On OSM, night mode darkens tiles with a CSS filter (`.dark.osm`). `applyTheme()` picks the layer.
-- **GPS** — `startGPS` → `onFix` computes speed/heading (falls back to deltas between fixes), then drives `followMe`, `navUpdate` or `freeAlerts`, and `maybeLimit`.
+- **Map (`M`)** — the app never touches a map library directly; it calls the adapter `M` (`setView`, `flyTo`, `fit`, `follow`, `marker`/`unmarker`/`unmarkers(prefix)`, `routes`, `acc`, `traffic`, `theme`, `lang`, `north`, events `click`/`longpress`/`dragstart`/`moveend`/`routeclick`/`view`). `M` keeps all overlays in `M._st` and redraws them whenever the engine or style changes. Two engines:
+  - **3D (`gl`)**: MapLibre GL 6 with OpenFreeMap vector styles (`liberty` day, `dark` night — a `building-3d` extrusion layer is added to dark). Loaded via a small inline `<script type=module>` so the main script stays classic. Driving view: `follow(..., navOn, tilt)` → pitch 60°, bearing = heading, position low on screen (top padding 45%). Our layers (`d-*`) sit right above `building-3d`, below labels. Labels are switched to `name:ar` / `name:en` in `lang()`. Arabic shaping via `setRTLTextPlugin` (0.3.0 classic build — MapLibre 6's worker evals it). Zoom numbers in the app are Leaflet's; the gl engine subtracts 1. `#map.__ml` exposes the live map for tests.
+  - **Flat (`flat`)**: Leaflet with CARTO Voyager/Dark Matter raster tiles (`CARTO_KEY`, `?key=`), OSM fallback after repeated tile errors (night darkens OSM via `.dark.osm`).
+  - `M.start(want3d)` picks gl when `S.map3d` is on and WebGL2 exists; if MapLibre or the style fails to load within ~15 s it falls back to flat. Settings → Map view switches engines live.
+  - Markers: ids `me`, `dest`, `rep:<id>`, `poi:<n>`; spec `{ll, html, size, anchor:'center'|'bottom', lift, z, rot, flat, onClick, popup}`. `rot` defined → rotates with the map (gl) / rotates `[data-rot]` (flat); `rot:null` adds class `norot`.
+- **GPS** — `startGPS` → `onFix` computes speed/heading (falls back to deltas between fixes), then drives `followMe` (→ `M.follow`), `navUpdate` or `freeAlerts`, `maybeLimit` and `sampleTraffic`.
 - **Search** — `geocode` (Photon → Nominatim), `reverse` (Nominatim), result list in `#results`.
 - **Routing** — `fetchRoutes` tries `ROUTERS` in order; `prepRoute` builds `ll` (lat/lng array), `cum` (cumulative distance), `steps`, and `sa` (distance-along of each step's maneuver).
 - **Navigation** — state in `nav`. `navUpdate` snaps to the route (`snapTo`), detects off-route → `reroute`, advances step index `k`, updates banner / numbers, triggers `voiceFor` (far / near / now prompts) and report alerts, and detects arrival.
@@ -21,7 +25,7 @@ The same `index.html` is packaged as an Android APK with Capacitor 8 (`android/`
 
 ## PWA
 
-- `sw.js` precaches the app shell and `vendor/`; pages are network-first, same-origin static files stale-while-revalidate. Tiles and API calls (including Supabase) are never intercepted. Not registered inside the APK.
+- `sw.js` precaches the app shell and `vendor/` (MapLibre's worker is requested as `maplibre-gl-worker.mjs?v=<version>` — keep that exact URL in the list when upgrading); pages are network-first, same-origin static files stale-while-revalidate. Tiles and API calls (including Supabase) are never intercepted. Not registered inside the APK.
 - **Bump `VERSION` in `sw.js`** whenever `sw.js` or its precache lists change. `index.html` changes need no bump (network-first).
 - `beforeinstallprompt` is stored in `installEvt`; Settings shows an Install app button while it's available.
 
@@ -48,5 +52,7 @@ The same `index.html` is packaged as an Android APK with Capacitor 8 (`android/`
 - Network calls go through `fetchT(url, ms, opt)` (timeout + abort).
 - Keep the web app single-file; update a vendored library by replacing its file in `vendor/` and bumping `VERSION` in `sw.js`.
 - Every new Tabler icon name must exist in `vendor/tabler/tabler-icons.min.css`.
+- New map features go through `M` and must work in both engines; test both (`S.map3d` true/false) and the no-WebGL2 fallback.
+- `scripts/build-www.mjs` must never lower `vendor/maplibre/*` (ES modules using `import.meta`).
 - Test the web app with a headless browser (Playwright is available) — mock Supabase for cloud features.
 - Test on a phone over https (GitHub Pages) — GPS, voice, and wake lock need a secure context.
