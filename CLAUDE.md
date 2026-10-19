@@ -15,7 +15,7 @@ The same `index.html` is packaged as an Android APK with Capacitor 8 (`android/`
 - **Routing** — `fetchRoutes` tries `ROUTERS` in order; `prepRoute` builds `ll` (lat/lng array), `cum` (cumulative distance), `steps`, and `sa` (distance-along of each step's maneuver).
 - **Navigation** — state in `nav`. `navUpdate` snaps to the route (`snapTo`), detects off-route → `reroute`, advances step index `k`, updates banner / numbers, triggers `voiceFor` (far / near / now prompts) and report alerts, and detects arrival.
 - **Instructions** — `instr(step)` builds text from OSRM maneuver type + modifier, separately for Arabic and English; `mIcon` maps maneuvers to Tabler icons.
-- **Reports** — `RT` defines types as `[icon, color, lifetimeMs]` (0 = permanent). Device-local only.
+- **Reports** — `RT` defines types as `[icon, color, lifetimeMs]` (0 = permanent). Local when signed out or offline; shared through Supabase when signed in (see Cloud below). Server lifetimes are in `add_report` in `supabase/schema.sql` and must match `RT`.
 - **Nearby** — `NEAR` holds Overpass filters per category.
 - **UI** — bottom sheet rendered from `SHEETS[name]()` via `sheet(name)`. All clicks go through one delegated handler keyed on `data-act`.
 
