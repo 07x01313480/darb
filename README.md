@@ -15,6 +15,7 @@ A lightweight, bilingual (Arabic / English) turn-by-turn driving navigation app 
 - Turn-by-turn navigation: maneuver banner, distance to next turn, ETA / time / distance remaining
 - Voice guidance in Arabic or English (Web Speech API), with timing scaled to speed
 - Automatic rerouting when you leave the route
+- BYD car dashboard (Android app): turn arrows on the instrument cluster through BYD's built-in AMap service, and optionally the map on the cluster's projection screen (DiLink 4/5)
 - Speed display, with posted speed limits from OSM and an over-limit warning
 - Hazard reports (jam, police / checkpoint, crash, hazard, closure, speed camera) with alerts ahead — shared with other drivers when signed in, otherwise kept on the device
 - Live traffic: signed-in drivers anonymously share their average speed while driving; slow and jammed areas show on the map and on your route
