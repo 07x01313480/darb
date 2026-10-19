@@ -41,6 +41,8 @@ The same `index.html` is packaged as an Android APK with Capacitor 8 (`android/`
 ## Android (Capacitor)
 
 - `NATIVE` is true inside the APK. Native plugins are reached with `Capacitor.registerPlugin(name)` — no bundler: `TextToSpeech` (speechSynthesis doesn't exist in Android WebView), `KeepAwake`, `App` (back button, deep links), `Browser`.
+- `Capacitor.registerPlugin` comes from `@capacitor/core`'s `dist/capacitor.js`, **not** from Android's native bridge. `scripts/build-www.mjs` copies it into `www/` and adds its `<script>` tag; without it every plugin is null (no voice, no sign-in — the 1.0.3 bug). Test native paths with a bridge mock that provides only `isNativePlatform`/`PluginHeaders`/`nativePromise`/`nativeCallback` plus `window.androidBridge`, never a fake `registerPlugin`.
+- Voice: `speak(text | () => text)`. `ttsSay` retries while the TTS engine initialises and, if `ar-SA` is unsupported, re-renders the text in English via `withLang('en', fn)` and flags `voiceProblem` (shown in Settings with Test voice / Install voices).
 - `npm run sync` = build `www/` (esbuild lowers JS to chrome60) + `npx cap sync android`. `www/`, `android/app/src/main/assets/public` and `capacitor-cordova-android-plugins` are generated, not committed.
 - App id `iq.layth.darb` — never change it (installed apps would stop updating).
 - Signing: `android/release.keystore.enc` (AES-256, pbkdf2 200k) + GitHub secret `DARB_KEYSTORE_PASSWORD`. Never commit a plaintext keystore. Version code = workflow run number.

@@ -19,6 +19,10 @@ const copy = rel => {
 };
 ['manifest.webmanifest', 'icons', 'vendor'].forEach(copy);
 
+// Capacitor's JS core. Android's native bridge provides Capacitor.isNativePlatform/nativePromise but NOT
+// Capacitor.registerPlugin(), which index.html uses to reach the native plugins (voice, browser, app, keep-awake).
+fs.copyFileSync(path.join(ROOT, 'node_modules/@capacitor/core/dist/capacitor.js'), path.join(OUT, 'capacitor.js'));
+
 const lower = async (code, label) => {
   try { return (await transform(code, { loader: 'js', target: TARGET, charset: 'utf8' })).code; }
   catch (e) { console.error(`Could not transform ${label}`); throw e; }
@@ -30,10 +34,14 @@ const m = html.match(/<script>([\s\S]*?)<\/script>/);
 if (!m) throw new Error('inline <script> not found in index.html');
 const js = await lower(m[1], 'index.html inline script');
 html = html.replace(m[0], () => `<script>\n${js}</script>`);
+const libTag = '<script src="vendor/leaflet/leaflet.js"></script>';
+if (!html.includes(libTag)) throw new Error('leaflet script tag not found in index.html');
+html = html.replace(libTag, `<script src="capacitor.js"></script>\n${libTag}`);
 fs.writeFileSync(path.join(OUT, 'index.html'), html);
 
 // Bundled libraries
-for (const rel of ['vendor/supabase/supabase.js', 'vendor/leaflet/leaflet.js']) {
+// Never vendor/maplibre/*: those are ES modules that rely on import.meta.
+for (const rel of ['capacitor.js', 'vendor/supabase/supabase.js', 'vendor/leaflet/leaflet.js']) {
   const p = path.join(OUT, rel);
   fs.writeFileSync(p, await lower(fs.readFileSync(p, 'utf8'), rel));
 }
