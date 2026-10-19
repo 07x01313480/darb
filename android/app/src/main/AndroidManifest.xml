@@ -32,6 +32,13 @@
 
         </activity>
 
+        <!-- Keeps GPS fixes coming while navigating with the app in the background (NavBackgroundPlugin). -->
+        <service
+            android:name=".NavService"
+            android:exported="false"
+            android:stopWithTask="true"
+            android:foregroundServiceType="location" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -48,6 +55,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 
     <!-- BYD's built-in AMap adapters, which put turn arrows on the instrument cluster (Android 11+ package visibility). -->

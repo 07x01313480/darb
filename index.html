@@ -177,7 +177,7 @@ noRoute:"Couldn't find a route. Check your connection and try again.",noGps:'Wai
 arrive:'Arrival',time:'Time',dist:'Distance',min:'min',h:'h',m:'m',km:'km',then:'Then',via:'via',fastest:'Fastest',
 rerouting:'Rerouting…',arrived:'You have arrived',setHome:'Set as home',setWork:'Set as work',setHomeFirst:'Search or long-press a place, then tap "Set as home" or "Set as work".',
 reported:'Report added',removed:'Removed',ahead:x=>`${x} reported ahead`,ago:n=>`${n} min ago`,
-settings:'Settings',lang:'Language',voice:'Voice guidance',night:'Night mode',auto:'Auto',on:'On',off:'Off',clearReports:'Clear all reports',install:'Install app',dash:'Car dashboard (BYD)',dashArrows:'Turn arrows',dashMap:'Arrows + map',dashCheck:'Check',dashTest:'Test',dashAdapter:'Turn-arrow service',dashDisplay:'Dashboard map screen',dashNone:'not found',dashTestNote:'Test sent: a right turn in 300 m. Look at the dashboard.',noDashMap:"This car's dashboard doesn't offer a map screen, so only turn arrows are shown.",testVoice:'Test voice',installVoice:'Install voices',voiceTest:'Voice guidance is working',noArVoice:'No Arabic voice is installed on this device, so directions are spoken in English. Tap Install voices in Settings to add Arabic.',voiceFail:"Voice guidance couldn't play. Check the device's text-to-speech settings.",voiceErr:'Voice problem',mapView:'Map view',m3d:'3D',flat:'Flat',no3d:"This device can't show the 3D map, so the flat map is used.",account:'Account',signIn:'Sign in with Google',signOut:'Sign out',signedIn:'Signed in',signedOut:'Signed out',signInWhy:'Optional: lets you share live traffic and road reports with other drivers.',signInFail:"Couldn't sign in. Try again.",shareTraffic:'Share anonymous traffic speed',signInToShare:'Saved on this phone. Sign in (Settings) to share reports with other drivers.',notThere:'Not there',thanks:'Thanks for the update',
+settings:'Settings',bgTitle:'Darb is navigating',lang:'Language',voice:'Voice guidance',night:'Night mode',auto:'Auto',on:'On',off:'Off',clearReports:'Clear all reports',install:'Install app',dash:'Car dashboard (BYD)',dashArrows:'Turn arrows',dashMap:'Arrows + map',dashCheck:'Check',dashTest:'Test',dashAdapter:'Turn-arrow service',dashDisplay:'Dashboard map screen',dashNone:'not found',dashTestNote:'Test sent: a right turn in 300 m. Look at the dashboard.',noDashMap:"This car's dashboard doesn't offer a map screen, so only turn arrows are shown.",testVoice:'Test voice',installVoice:'Install voices',voiceTest:'Voice guidance is working',noArVoice:'No Arabic voice is installed on this device, so directions are spoken in English. Tap Install voices in Settings to add Arabic.',voiceFail:"Voice guidance couldn't play. Check the device's text-to-speech settings.",voiceErr:'Voice problem',mapView:'Map view',m3d:'3D',flat:'Flat',no3d:"This device can't show the 3D map, so the flat map is used.",account:'Account',signIn:'Sign in with Google',signOut:'Sign out',signedIn:'Signed in',signedOut:'Signed out',signInWhy:'Optional: lets you share live traffic and road reports with other drivers.',signInFail:"Couldn't sign in. Try again.",shareTraffic:'Share anonymous traffic speed',signInToShare:'Saved on this phone. Sign in (Settings) to share reports with other drivers.',notThere:'Not there',thanks:'Thanks for the update',
 shareEta:'Share ETA',eta:(p,c)=>`I'm on my way to ${p}. Arriving around ${c}.`,copied:'Copied',overSpeed:'Slow down, you are over the speed limit',longPress:'Tip: long-press the map to drop a pin',
 about:'Map data © OpenStreetMap contributors · Routing: OSRM · Search: Photon and Nominatim.',aboutLocal:'Reports are stored on this phone only.',aboutCloud:"Shared reports and anonymous traffic speeds are stored in Darb's Supabase database. Traffic samples carry no account information."},
 ar:{search:'ابحث عن مكان',home:'البيت',work:'العمل',fuel:'وقود',parking:'موقف سيارات',hospital:'مستشفى',atm:'صراف آلي',kmh:'كم/س',
@@ -188,7 +188,7 @@ noRoute:'تعذّر إيجاد طريق. تحقّق من الاتصال وحاو
 arrive:'الوصول',time:'المدة',dist:'المسافة',min:'د',h:'س',m:'م',km:'كم',then:'ثم',via:'عبر',fastest:'الأسرع',
 rerouting:'جارٍ إعادة حساب المسار…',arrived:'لقد وصلت إلى وجهتك',setHome:'تعيين كبيت',setWork:'تعيين كعمل',setHomeFirst:'ابحث عن مكان أو اضغط مطولًا على الخريطة، ثم اختر "تعيين كبيت" أو "تعيين كعمل".',
 reported:'تمت إضافة البلاغ',removed:'تم الحذف',ahead:x=>`انتبه: ${x} في الطريق أمامك`,ago:n=>`منذ ${n} د`,
-settings:'الإعدادات',lang:'اللغة',voice:'التوجيه الصوتي',night:'الوضع الليلي',auto:'تلقائي',on:'تشغيل',off:'إيقاف',clearReports:'حذف كل البلاغات',install:'تثبيت التطبيق',dash:'شاشة عدادات السيارة (BYD)',dashArrows:'أسهم الاتجاه',dashMap:'الأسهم + الخريطة',dashCheck:'فحص',dashTest:'تجربة',dashAdapter:'خدمة أسهم الاتجاه',dashDisplay:'شاشة الخريطة في العدادات',dashNone:'غير موجودة',dashTestNote:'تم إرسال تجربة: انعطاف يمينًا بعد 300 م. انظر إلى شاشة العدادات.',noDashMap:'شاشة العدادات في هذه السيارة لا تدعم عرض الخريطة، لذلك تُعرض أسهم الاتجاه فقط.',testVoice:'تجربة الصوت',installVoice:'تثبيت الأصوات',voiceTest:'التوجيه الصوتي يعمل',noArVoice:'لا يوجد صوت عربي مثبّت على هذا الجهاز، لذلك تُقرأ التعليمات بالإنجليزية. اضغط تثبيت الأصوات في الإعدادات لإضافة العربية.',voiceFail:'تعذّر تشغيل التوجيه الصوتي. تحقّق من إعدادات تحويل النص إلى كلام في الجهاز.',voiceErr:'مشكلة في الصوت',mapView:'عرض الخريطة',m3d:'ثلاثي الأبعاد',flat:'مسطّح',no3d:'هذا الجهاز لا يدعم الخريطة ثلاثية الأبعاد، لذلك تُستخدم الخريطة المسطّحة.',account:'الحساب',signIn:'تسجيل الدخول عبر Google',signOut:'تسجيل الخروج',signedIn:'تم تسجيل الدخول',signedOut:'تم تسجيل الخروج',signInWhy:'اختياري: يتيح لك مشاركة حالة المرور والبلاغات مع السائقين الآخرين.',signInFail:'تعذّر تسجيل الدخول. حاول مجددًا.',shareTraffic:'مشاركة سرعة المرور دون الكشف عن هويتك',signInToShare:'تم الحفظ على هذا الهاتف. سجّل الدخول من الإعدادات لمشاركة البلاغات مع السائقين الآخرين.',notThere:'غير موجود',thanks:'شكرًا على التحديث',
+settings:'الإعدادات',bgTitle:'درب يرشدك الآن',lang:'اللغة',voice:'التوجيه الصوتي',night:'الوضع الليلي',auto:'تلقائي',on:'تشغيل',off:'إيقاف',clearReports:'حذف كل البلاغات',install:'تثبيت التطبيق',dash:'شاشة عدادات السيارة (BYD)',dashArrows:'أسهم الاتجاه',dashMap:'الأسهم + الخريطة',dashCheck:'فحص',dashTest:'تجربة',dashAdapter:'خدمة أسهم الاتجاه',dashDisplay:'شاشة الخريطة في العدادات',dashNone:'غير موجودة',dashTestNote:'تم إرسال تجربة: انعطاف يمينًا بعد 300 م. انظر إلى شاشة العدادات.',noDashMap:'شاشة العدادات في هذه السيارة لا تدعم عرض الخريطة، لذلك تُعرض أسهم الاتجاه فقط.',testVoice:'تجربة الصوت',installVoice:'تثبيت الأصوات',voiceTest:'التوجيه الصوتي يعمل',noArVoice:'لا يوجد صوت عربي مثبّت على هذا الجهاز، لذلك تُقرأ التعليمات بالإنجليزية. اضغط تثبيت الأصوات في الإعدادات لإضافة العربية.',voiceFail:'تعذّر تشغيل التوجيه الصوتي. تحقّق من إعدادات تحويل النص إلى كلام في الجهاز.',voiceErr:'مشكلة في الصوت',mapView:'عرض الخريطة',m3d:'ثلاثي الأبعاد',flat:'مسطّح',no3d:'هذا الجهاز لا يدعم الخريطة ثلاثية الأبعاد، لذلك تُستخدم الخريطة المسطّحة.',account:'الحساب',signIn:'تسجيل الدخول عبر Google',signOut:'تسجيل الخروج',signedIn:'تم تسجيل الدخول',signedOut:'تم تسجيل الخروج',signInWhy:'اختياري: يتيح لك مشاركة حالة المرور والبلاغات مع السائقين الآخرين.',signInFail:'تعذّر تسجيل الدخول. حاول مجددًا.',shareTraffic:'مشاركة سرعة المرور دون الكشف عن هويتك',signInToShare:'تم الحفظ على هذا الهاتف. سجّل الدخول من الإعدادات لمشاركة البلاغات مع السائقين الآخرين.',notThere:'غير موجود',thanks:'شكرًا على التحديث',
 shareEta:'مشاركة وقت الوصول',eta:(p,c)=>`أنا في الطريق إلى ${p}. الوصول حوالي ${c}.`,copied:'تم النسخ',overSpeed:'خفّف السرعة، تجاوزت الحد المسموح',longPress:'نصيحة: اضغط مطولًا على الخريطة لتحديد نقطة',
 about:'بيانات الخريطة © مساهمو OpenStreetMap · التوجيه: OSRM · البحث: Photon وNominatim.',aboutLocal:'البلاغات محفوظة على هذا الهاتف فقط.',aboutCloud:'البلاغات المشتركة وسرعات المرور المجهولة محفوظة في قاعدة بيانات درب على Supabase. عيّنات المرور لا تحمل أي معلومات عن الحساب.'}
 };
@@ -214,7 +214,7 @@ let tT=null;function toast(m,ms=2500){const el=$('#toast');el.textContent=m;el.h
 // ── Platform: inside the Android app (Capacitor) or a normal browser ──
 const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
 const plugin=n=>NATIVE&&Capacitor.registerPlugin?Capacitor.registerPlugin(n):null;
-const TTS=plugin('TextToSpeech'),KEEP=plugin('KeepAwake'),APP=plugin('App'),BROWSER=plugin('Browser'),DASH=plugin('Dashboard');
+const TTS=plugin('TextToSpeech'),KEEP=plugin('KeepAwake'),APP=plugin('App'),BROWSER=plugin('Browser'),DASH=plugin('Dashboard'),BGNAV=plugin('NavBackground');
 // index.html?cluster=1 is the map page the APK shows on the car's instrument cluster (see DashboardPlugin.java).
 const CLUSTER=/[?&]cluster=1(&|$)/.test(location.search);
 
@@ -447,8 +447,19 @@ async function requestWake(){if(KEEP){KEEP.keepAwake().catch(()=>{});return}try{
 function releaseWake(){if(KEEP){KEEP.allowSleep().catch(()=>{});return}try{wake&&wake.release()}catch(e){}wake=null}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&nav.active)requestWake()});
 
+// Android: the WebView's GPS stops while the app is in the background, so during navigation a foreground service
+// (NavBackground) delivers fixes natively and guidance, voice and the car dashboard keep updating. Its fixes take
+// precedence over the WebView's while they keep coming.
+let bgOn=false,bgFixT=0,bgSub=null,bgK=-1;
+async function bgStart(){if(!BGNAV||bgOn)return;bgOn=true;bgK=-1;
+ try{if(!bgSub)bgSub=await BGNAV.addListener('fix',f=>{if(!bgOn||!f)return;bgFixT=Date.now();
+   onFix({coords:{latitude:f.lat,longitude:f.lng,accuracy:f.acc??0,speed:f.speed??null,heading:f.head??null},timestamp:f.t||Date.now()})});
+  await BGNAV.start({title:t('bgTitle'),text:dest&&dest.name||''});if(!bgOn)BGNAV.stop().catch(()=>{})}catch(e){bgOn=false}}
+function bgStop(){if(!BGNAV||!bgOn)return;bgOn=false;BGNAV.stop().catch(()=>{})}
+function bgNote(k){if(!bgOn||k===bgK||!nav.r)return;bgK=k;BGNAV.update({text:instr(nav.r.steps[k])}).catch(()=>{})}
+
 let me=null,meHead=null,meSpeed=0,meAcc=0,follow=true,lastFix=null;
-function startGPS(){if(!('geolocation' in navigator)){toast(t('noGps'));return}if(!window.isSecureContext)toast(t('https'),6000);navigator.geolocation.watchPosition(onFix,e=>{if(e.code===1)toast(window.isSecureContext?t('gpsDenied'):t('https'),6000)},{enableHighAccuracy:true,maximumAge:1000,timeout:20000})}
+function startGPS(){if(!('geolocation' in navigator)){toast(t('noGps'));return}if(!window.isSecureContext)toast(t('https'),6000);navigator.geolocation.watchPosition(pos=>{if(bgOn&&Date.now()-bgFixT<3000)return;onFix(pos)},e=>{if(e.code===1)toast(window.isSecureContext?t('gpsDenied'):t('https'),6000)},{enableHighAccuracy:true,maximumAge:1000,timeout:20000})}
 function onFix(pos){
  const c=pos.coords,p=[c.latitude,c.longitude];let sp=(c.speed!=null&&!isNaN(c.speed))?c.speed:null;
  if(lastFix){const dt=(pos.timestamp-lastFix.t)/1000,d=dist(lastFix.p,p);if(sp==null&&dt>0)sp=d/dt;if(d>5&&(c.heading==null||isNaN(c.heading)))meHead=bearing(lastFix.p,p)}
@@ -581,7 +592,7 @@ function setNavRoute(r){Object.assign(nav,{r,idx:0,k:1,spoken:{},off:0,along:0,r
 function indexReports(r){for(const x of activeReports()){if(x.id in nav.repA)continue;const s=snapTo(r,[x.lat,x.lng],true);if(s.d<40)nav.repA[x.id]=alongOf(r,s)}}
 function startNav(){
  const r=routes[sel];if(!r||!me)return;unlockAudio();routes=[r];sel=0;drawRoutes();setNavRoute(r);nav.active=true;follow=true;
- $('#top').hidden=true;$('#banner').hidden=false;hideList();M.unmarkers('poi:');sheet('nav');requestWake();M.follow(me,17,meHead,true,S.map3d!==false);updNorth();
+ $('#top').hidden=true;$('#banner').hidden=false;hideList();M.unmarkers('poi:');sheet('nav');requestWake();bgStart();M.follow(me,17,meHead,true,S.map3d!==false);updNorth();
  const s1=r.steps[1];if(s1)nav.spoken[1]={far:1,near:r.sa[1]<300?1:0};
  speak(()=>{let txt=instr(r.steps[0]);if(s1)txt+=(AR()?'، ثم ':', then ')+lc(inDist(r.sa[1],instr(s1)));return txt});dashStart();navUpdate();
 }
@@ -592,7 +603,7 @@ function navUpdate(){
  if(s.d>offLim&&(nav.onroute||dist(nav.startP||me,me)>80)){if(++nav.off>=3&&Date.now()-nav.lastRe>12000)reroute()}else nav.off=0;
  let k=nav.k;while(k<r.steps.length-1&&r.sa[k]<=along+5)k++;nav.k=k;
  const dNext=Math.max(0,r.sa[k]-along),rem=Math.max(0,r.total-along);
- renderBanner(k,dNext);renderNavNums(rem);voiceFor(k,dNext);navReportAlerts();dashUpdate(k,dNext,rem);
+ renderBanner(k,dNext);renderNavNums(rem);voiceFor(k,dNext);navReportAlerts();dashUpdate(k,dNext,rem);bgNote(k);
  if(s.d<60&&(rem<25||(k===r.steps.length-1&&dNext<25)))arrive();
 }
 function voiceFor(k,d){
@@ -605,7 +616,7 @@ function renderBanner(k,d){const r=nav.r,s=r.steps[k];$('#bi').className='ti '+m
 function renderNavNums(rem){if(sheetState!=='nav')return;const r=nav.r,sec=r.dur*rem/r.total;$('#nEta').textContent=clock(sec);$('#nTime').textContent=fmtDur(sec);$('#nDist').textContent=fmtDist(rem)}
 async function reroute(){nav.lastRe=Date.now();nav.off=0;toast(t('rerouting'));try{const rs=await fetchRoutes(me,[dest.lat,dest.lng],meSpeed>3?meHead:null);if(!nav.active)return;routes=[rs[0]];sel=0;drawRoutes();setNavRoute(rs[0]);nav.onroute=true;navUpdate()}catch(e){toast(t('noRoute'))}}
 function arrive(){endNav(false);speak(()=>t('arrived'));sheet('arrived')}
-function endNav(clear){nav.active=false;nav.r=null;releaseWake();dashEnd();$('#banner').hidden=true;$('#top').hidden=false;routes=[];drawRoutes();M.north();if(clear){setDest(null);dest=null;place=null;sheet(null)}}
+function endNav(clear){nav.active=false;nav.r=null;releaseWake();bgStop();dashEnd();$('#banner').hidden=true;$('#top').hidden=false;routes=[];drawRoutes();M.north();if(clear){setDest(null);dest=null;place=null;sheet(null)}}
 
 const RT={jam:['ti-car','#e8590c',36e5],police:['ti-shield','#1c7ed6',72e5],accident:['ti-car-crash','#c92a2a',72e5],hazard:['ti-alert-triangle','#f08c00',432e5],closure:['ti-barrier-block','#862e9c',864e5],camera:['ti-camera','#495057',0]};
 const alerted=new Set();
