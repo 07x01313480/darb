@@ -214,7 +214,10 @@ const same=(a,b)=>!!(a&&b)&&dist([a.lat,a.lng],[b.lat,b.lng])<30;
 function fmtDist(m){if(m<1000){const r=m<100?Math.round(m/10)*10:Math.round(m/50)*50;return nf(r)+' '+t('m')}return nf(m/1000,m<10000?1:0)+' '+t('km')}
 function fmtDur(s){const mn=Math.max(1,Math.round(s/60));if(mn<60)return nf(mn)+' '+t('min');return nf(Math.floor(mn/60))+' '+t('h')+' '+nf(mn%60)+' '+t('min')}
 const clock=s=>new Date(Date.now()+s*1000).toLocaleTimeString(loc(),{hour:'2-digit',minute:'2-digit'});
-async function fetchT(url,ms=10000,opt={}){const c=new AbortController(),id=setTimeout(()=>c.abort(),ms);try{return await fetch(url,{...opt,signal:c.signal})}finally{clearTimeout(id)}}
+// The time limit also covers reading the body (callers read it right away): a server that answers and then stalls
+// can't leave the app waiting forever. opt.signal cancels early.
+async function fetchT(url,ms=10000,opt={}){const c=new AbortController(),id=setTimeout(()=>c.abort(),ms);if(opt.signal)opt.signal.addEventListener('abort',()=>c.abort());
+ try{return await fetch(url,{...opt,signal:c.signal})}catch(e){clearTimeout(id);throw e}}
 let tT=null;function toast(m,ms=2500){const el=$('#toast');el.textContent=m;el.hidden=false;clearTimeout(tT);tT=setTimeout(()=>el.hidden=true,ms)}
 
 // ── Platform: inside the Android app (Capacitor) or a normal browser ──
@@ -500,8 +503,16 @@ function followMe(){if(nav.active){const z=meSpeed>22?15:meSpeed>12?16:17;M.foll
 
 let limit=null,limAt=null,limT=0,lastBeep=0;
 const parseLimit=s=>{const n=parseInt(s,10);if(isNaN(n))return null;return/mph/i.test(s)?Math.round(n*1.609):n};
-const OVERPASS=['https://overpass-api.de/api/interpreter','https://overpass.private.coffee/api/interpreter'];
-async function overpass(q,ms=15000){for(const u of OVERPASS){try{const r=await fetchT(u,ms,{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'}});if(r.ok)return await r.json()}catch(e){}}throw new Error('overpass')}
+const OVERPASS=['https://overpass-api.de/api/interpreter','https://overpass.private.coffee/api/interpreter','https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
+// Starts with the first server and adds the next one after 4 s or as soon as one fails; the first good answer wins.
+function overpass(q,ms=12000){const body='data='+encodeURIComponent(q),headers={'Content-Type':'application/x-www-form-urlencoded'};
+ return new Promise((res,rej)=>{let done=false,n=0,fails=0;const ctl=[],timers=[];
+  const finish=(ok,v)=>{if(done)return;done=true;timers.forEach(clearTimeout);ctl.forEach(c=>c.abort());ok?res(v):rej(v)};
+  const launch=()=>{if(done||n>=OVERPASS.length)return;const u=OVERPASS[n++],c=new AbortController();ctl.push(c);
+   fetchT(u,ms,{method:'POST',body,headers,signal:c.signal}).then(async r=>{if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();
+     if(!j||!Array.isArray(j.elements)||(!j.elements.length&&/error|timed out|rate/i.test(j.remark||'')))throw new Error('overpass');finish(true,j)})
+    .catch(()=>{if(++fails>=OVERPASS.length)finish(false,new Error('overpass'));else launch()})};
+  launch();timers.push(setTimeout(launch,4000),setTimeout(launch,8000))})}
 async function maybeLimit(){if(!me||meSpeed<3)return;if(limAt&&(Date.now()-limT<30000||dist(limAt,me)<150))return;limT=Date.now();limAt=me;try{const j=await overpass(`[out:json][timeout:8];way(around:20,${me[0]},${me[1]})[highway][maxspeed];out tags 1;`,9000);const w=j.elements&&j.elements[0];limit=w?parseLimit(w.tags.maxspeed):null}catch(e){}updateSpeed()}
 function updateSpeed(){const k=Math.round(meSpeed*3.6);$('#spv').textContent=nf(k);const lm=$('#lim');lm.hidden=!limit;if(limit)lm.textContent=nf(limit);const over=!!limit&&k>limit+5;$('#spd').classList.toggle('over',over);if(over&&Date.now()-lastBeep>30000){lastBeep=Date.now();beep();toast(t('overSpeed'))}}
 
@@ -754,10 +765,14 @@ async function dashTest(){if(!DASH)return;await dashCheck();
  if(S.dash==='map'&&me)DASH.showMap().then(r=>{dashMap=true;dashInset=/^shared_/.test(r&&r.display||'')?{top:150,left:24}:null;dashPush()}).catch(()=>toast(t('noDashMap'),5000));
  setTimeout(()=>{if(!nav.active)dashEnd()},15000)}
 
+// Fallback when every Overpass server fails: Nominatim's category search ("fuel", "atm"…) inside a ~4 km box.
+const NEAR_Q={fuel:'fuel',parking:'parking',hospital:'hospital',atm:'atm'};
+async function nominatimNear(k,c){const d=.04,r=await fetchT(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=25&bounded=1&accept-language=${S.lang}&q=${NEAR_Q[k]}&viewbox=${c[1]-d},${c[0]+d},${c[1]+d},${c[0]-d}`,10000);
+ if(!r.ok)throw new Error('nominatim');const j=await r.json();return{elements:j.map(e=>({lat:+e.lat,lon:+e.lon,tags:{name:e.name||''}}))}}
 const NEAR={fuel:['[amenity=fuel]','ti-gas-station'],parking:['[amenity=parking]','ti-parking'],hospital:['[amenity~"^(hospital|clinic)$"]','ti-building-hospital'],atm:['[amenity~"^(atm|bank)$"]','ti-building-bank']};
 async function nearby(k){
  const c=me||M.center(),[f,ic]=NEAR[k];hideList();sheet('loading');
- try{const j=await overpass(`[out:json][timeout:15];nwr${f}(around:4000,${c[0]},${c[1]});out center 40;`);
+ try{const j=await overpass(`[out:json][timeout:10];nwr${f}(around:4000,${c[0]},${c[1]});out center 40;`).catch(()=>nominatimNear(k,c));
   nearList=j.elements.map(e=>{const lat=e.lat??e.center?.lat,lng=e.lon??e.center?.lon,g=e.tags||{};return{name:g['name:'+S.lang]||g.name||g['name:en']||t(k),addr:[g.brand,g['addr:street']].filter(Boolean).join(' · '),lat,lng,icon:ic,d:lat!=null?dist(c,[lat,lng]):0}}).filter(x=>x.lat!=null).sort((a,b)=>a.d-b.d).slice(0,25);
   M.unmarkers('poi:');nearList.forEach((p,i)=>M.marker('poi:'+i,{ll:[p.lat,p.lng],html:`<div class="poi"><i class="ti ${ic}"></i></div>`,size:[28,28],z:100,onClick:()=>selectPlace(p)}));
   nearKey=k;sheet('nearby');if(nearList.length){follow=false;M.fit(nearList.slice(0,10).map(p=>[p.lat,p.lng]).concat([c]),{top:140,right:40,bottom:$('#sheet').offsetHeight+30,left:40})}
