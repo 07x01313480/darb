@@ -27,6 +27,7 @@ The same `index.html` is packaged as an Android APK with Capacitor 8 (`android/`
 
 ## Cloud (Supabase)
 
+- Project: `darb`, ref `qxxnyhwifclvrdwsurqo`, region eu-central-1 (Frankfurt), free plan. Through the Supabase connector, SQL containing `delete`/`revoke` needs a confirmation that can't be shown on the user's phone, so schema changes with those go to the user to run in the SQL Editor; additive changes can be applied with `apply_migration`.
 - Config: `SB_URL` / `SB_KEY` (publishable key) near the top of the script. Both empty → `CLOUD=false` and every cloud feature is hidden (device-only mode). The app must keep working fully in that mode.
 - The app only calls RPC functions: `get_traffic`, `get_reports` (anon OK), `submit_traffic`, `add_report`, `remove_report` (signed in). Tables have RLS on with no policies. Change `supabase/schema.sql` and tell the user to re-run it in the SQL Editor (it's idempotent).
 - Auth: Google via `signInWithOAuth`, PKCE. Web redirects back to the page; the APK opens the system browser (`Browser` plugin) and returns via `darb://auth` (`appUrlOpen` → `finishAppSignIn`).

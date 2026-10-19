@@ -48,6 +48,7 @@ create table if not exists public.report_votes (
   user_id   uuid not null references auth.users (id) on delete cascade,
   primary key (report_id, user_id)
 );
+create index if not exists report_votes_user on public.report_votes (user_id);
 
 -- Lock the tables: RLS on with no policies = no direct access through the API.
 alter table public.traffic_samples enable row level security;
