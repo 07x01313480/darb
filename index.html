@@ -693,14 +693,12 @@ function amapIcon(s){const ty=s.maneuver.type,m=s.maneuver.modifier||'straight';
  if(ty==='exit roundabout'||ty==='exit rotary')return[12,0];
  if(ty==='roundabout'||ty==='rotary')return[11,s.maneuver.exit||0];
  return[AMAP_TURN[m]||9,0]}
-// The cluster's own font may lack Arabic letters, so only Latin road names/numbers are sent there.
-const latinOnly=x=>x&&!/[\u0600-\u06FF]/.test(x)?x:'';
 const enDist=m=>m<0?'':m<1000?Math.round(m/10)*10+' m':m<10000?(m/1000).toFixed(1)+' km':Math.round(m/1000)+' km';
 const enDur=sec=>{const mn=Math.max(1,Math.round(sec/60));return mn<60?mn+' min':Math.floor(mn/60)+' h '+(mn%60)+' min'};
 function dashStart(){if(!DASH||S.dash==='off')return;dashLast='';dashT=0;dashSentRoute=-1;DASH.start().catch(()=>{});
  if(S.dash==='map')DASH.showMap().then(r=>{dashMap=true;dashInset=/^shared_/.test(r&&r.display||'')?{top:150,left:24}:null;dashPush()}).catch(e=>{dashMap=false;if(!LS.get('noDashMapTold',false)){toast(t('noDashMap'),5000);LS.set('noDashMapTold',true)}})}
 function dashUpdate(k,dNext,rem){if(!DASH||S.dash==='off'||!nav.r)return;const r=nav.r,s=r.steps[k],now=Date.now();
- const[icon,rb]=amapIcon(s),sec=r.dur*rem/r.total,road=latinOnly(s.name)||latinOnly(s.ref)||'',dist=Math.max(0,Math.round(dNext));
+ const[icon,rb]=amapIcon(s),sec=r.dur*rem/r.total,road=s.name||s.ref||'',dist=Math.max(0,Math.round(dNext));
  const key=[icon,rb,Math.round(dist/10),road].join('|');
  if(key!==dashLast||now-dashT>2000){dashLast=key;dashT=now;
   DASH.guidance({icon,roundabout:rb,dist,road,remainDist:Math.round(rem),remainTime:Math.round(sec),distText:enDist(dist),remainDistText:enDist(rem),remainTimeText:enDur(sec),
