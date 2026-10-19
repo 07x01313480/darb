@@ -163,7 +163,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;paddin
 'use strict';
 const $=s=>document.querySelector(s);
 const LS={get(k,d){try{const v=localStorage.getItem('darb.'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('darb.'+k,JSON.stringify(v))}catch(e){}}};
-const S=Object.assign({lang:/^ar/i.test(navigator.language||'')?'ar':'en',voice:true,night:'auto',share:true,map3d:true,dash:'arrows'},LS.get('settings',{}));
+const S=Object.assign({lang:/^ar/i.test(navigator.language||'')?'ar':'en',voice:true,night:'auto',share:true,map3d:true,dash:'arrows',voiceOut:'nav'},LS.get('settings',{}));
 const P=Object.assign({home:null,work:null,favs:[]},LS.get('places',{}));
 let recents=LS.get('recents',[]),reports=LS.get('reports',[]);
 const saveS=()=>LS.set('settings',S),saveP=()=>LS.set('places',P);
@@ -177,7 +177,7 @@ noRoute:"Couldn't find a route. Check your connection and try again.",noGps:'Wai
 arrive:'Arrival',time:'Time',dist:'Distance',min:'min',h:'h',m:'m',km:'km',then:'Then',via:'via',fastest:'Fastest',
 rerouting:'Rerouting…',arrived:'You have arrived',setHome:'Set as home',setWork:'Set as work',setHomeFirst:'Search or long-press a place, then tap "Set as home" or "Set as work".',
 reported:'Report added',removed:'Removed',ahead:x=>`${x} reported ahead`,ago:n=>`${n} min ago`,
-settings:'Settings',bgTitle:'Darb is navigating',lang:'Language',voice:'Voice guidance',night:'Night mode',auto:'Auto',on:'On',off:'Off',clearReports:'Clear all reports',install:'Install app',dash:'Car dashboard (BYD)',dashArrows:'Turn arrows',dashMap:'Arrows + map',dashCheck:'Check',dashTest:'Test',dashAdapter:'Turn-arrow service',dashDisplay:'Dashboard map screen',dashNone:'not found',dashTestNote:'Test sent: a right turn in 300 m. Look at the dashboard.',noDashMap:"This car's dashboard doesn't offer a map screen, so only turn arrows are shown.",testVoice:'Test voice',installVoice:'Install voices',voiceTest:'Voice guidance is working',noArVoice:'No Arabic voice is installed on this device, so directions are spoken in English. Tap Install voices in Settings to add Arabic.',voiceFail:"Voice guidance couldn't play. Check the device's text-to-speech settings.",voiceErr:'Voice problem',mapView:'Map view',m3d:'3D',flat:'Flat',no3d:"This device can't show the 3D map, so the flat map is used.",account:'Account',signIn:'Sign in with Google',signOut:'Sign out',signedIn:'Signed in',signedOut:'Signed out',signInWhy:'Optional: lets you share live traffic and road reports with other drivers.',signInFail:"Couldn't sign in. Try again.",shareTraffic:'Share anonymous traffic speed',signInToShare:'Saved on this phone. Sign in (Settings) to share reports with other drivers.',notThere:'Not there',thanks:'Thanks for the update',
+settings:'Settings',bgTitle:'Darb is navigating',lang:'Language',voice:'Voice guidance',night:'Night mode',auto:'Auto',on:'On',off:'Off',clearReports:'Clear all reports',install:'Install app',dash:'Car dashboard (BYD)',dashArrows:'Turn arrows',dashMap:'Arrows + map',dashCheck:'Check',dashTest:'Test',dashAdapter:'Turn-arrow service',dashDisplay:'Dashboard map screen',dashNone:'not found',dashTestNote:'Test sent: a right turn in 300 m. Look at the dashboard.',noDashMap:"This car's dashboard doesn't offer a map screen, so only turn arrows are shown.",testVoice:'Test voice',installVoice:'Voice settings',voiceOut:'Voice output',voiceNav:'Navigation',voiceMedia:'Media',voiceTesting:'Testing voice…',voiceHeard:"Darb spoke the test sentence. If you heard nothing, turn up the volume or switch Voice output.",volZero:'Darb spoke, but the media volume is at zero. Turn it up.',noEngine:'This device has no working text-to-speech engine. Tap Voice settings to install or turn one on (for example Speech Services by Google).',voiceEngine:'Voice engine',voiceArabic:'Arabic voice',voiceVolume:'Media volume',arYes:'installed',arData:'needs download',arNo:'not available',voiceTest:'Voice guidance is working',noArVoice:'No Arabic voice is installed on this device, so directions are spoken in English. Tap Voice settings in Settings to add Arabic.',voiceFail:"Voice guidance couldn't play. Check the device's text-to-speech settings.",voiceErr:'Voice problem',mapView:'Map view',m3d:'3D',flat:'Flat',no3d:"This device can't show the 3D map, so the flat map is used.",account:'Account',signIn:'Sign in with Google',signOut:'Sign out',signedIn:'Signed in',signedOut:'Signed out',signInWhy:'Optional: lets you share live traffic and road reports with other drivers.',signInFail:"Couldn't sign in. Try again.",shareTraffic:'Share anonymous traffic speed',signInToShare:'Saved on this phone. Sign in (Settings) to share reports with other drivers.',notThere:'Not there',thanks:'Thanks for the update',
 shareEta:'Share ETA',eta:(p,c)=>`I'm on my way to ${p}. Arriving around ${c}.`,copied:'Copied',overSpeed:'Slow down, you are over the speed limit',longPress:'Tip: long-press the map to drop a pin',
 about:'Map data © OpenStreetMap contributors · Routing: OSRM · Search: Photon and Nominatim.',aboutLocal:'Reports are stored on this phone only.',aboutCloud:"Shared reports and anonymous traffic speeds are stored in Darb's Supabase database. Traffic samples carry no account information."},
 ar:{search:'ابحث عن مكان',home:'البيت',work:'العمل',fuel:'وقود',parking:'موقف سيارات',hospital:'مستشفى',atm:'صراف آلي',kmh:'كم/س',
@@ -188,7 +188,7 @@ noRoute:'تعذّر إيجاد طريق. تحقّق من الاتصال وحاو
 arrive:'الوصول',time:'المدة',dist:'المسافة',min:'د',h:'س',m:'م',km:'كم',then:'ثم',via:'عبر',fastest:'الأسرع',
 rerouting:'جارٍ إعادة حساب المسار…',arrived:'لقد وصلت إلى وجهتك',setHome:'تعيين كبيت',setWork:'تعيين كعمل',setHomeFirst:'ابحث عن مكان أو اضغط مطولًا على الخريطة، ثم اختر "تعيين كبيت" أو "تعيين كعمل".',
 reported:'تمت إضافة البلاغ',removed:'تم الحذف',ahead:x=>`انتبه: ${x} في الطريق أمامك`,ago:n=>`منذ ${n} د`,
-settings:'الإعدادات',bgTitle:'درب يرشدك الآن',lang:'اللغة',voice:'التوجيه الصوتي',night:'الوضع الليلي',auto:'تلقائي',on:'تشغيل',off:'إيقاف',clearReports:'حذف كل البلاغات',install:'تثبيت التطبيق',dash:'شاشة عدادات السيارة (BYD)',dashArrows:'أسهم الاتجاه',dashMap:'الأسهم + الخريطة',dashCheck:'فحص',dashTest:'تجربة',dashAdapter:'خدمة أسهم الاتجاه',dashDisplay:'شاشة الخريطة في العدادات',dashNone:'غير موجودة',dashTestNote:'تم إرسال تجربة: انعطاف يمينًا بعد 300 م. انظر إلى شاشة العدادات.',noDashMap:'شاشة العدادات في هذه السيارة لا تدعم عرض الخريطة، لذلك تُعرض أسهم الاتجاه فقط.',testVoice:'تجربة الصوت',installVoice:'تثبيت الأصوات',voiceTest:'التوجيه الصوتي يعمل',noArVoice:'لا يوجد صوت عربي مثبّت على هذا الجهاز، لذلك تُقرأ التعليمات بالإنجليزية. اضغط تثبيت الأصوات في الإعدادات لإضافة العربية.',voiceFail:'تعذّر تشغيل التوجيه الصوتي. تحقّق من إعدادات تحويل النص إلى كلام في الجهاز.',voiceErr:'مشكلة في الصوت',mapView:'عرض الخريطة',m3d:'ثلاثي الأبعاد',flat:'مسطّح',no3d:'هذا الجهاز لا يدعم الخريطة ثلاثية الأبعاد، لذلك تُستخدم الخريطة المسطّحة.',account:'الحساب',signIn:'تسجيل الدخول عبر Google',signOut:'تسجيل الخروج',signedIn:'تم تسجيل الدخول',signedOut:'تم تسجيل الخروج',signInWhy:'اختياري: يتيح لك مشاركة حالة المرور والبلاغات مع السائقين الآخرين.',signInFail:'تعذّر تسجيل الدخول. حاول مجددًا.',shareTraffic:'مشاركة سرعة المرور دون الكشف عن هويتك',signInToShare:'تم الحفظ على هذا الهاتف. سجّل الدخول من الإعدادات لمشاركة البلاغات مع السائقين الآخرين.',notThere:'غير موجود',thanks:'شكرًا على التحديث',
+settings:'الإعدادات',bgTitle:'درب يرشدك الآن',lang:'اللغة',voice:'التوجيه الصوتي',night:'الوضع الليلي',auto:'تلقائي',on:'تشغيل',off:'إيقاف',clearReports:'حذف كل البلاغات',install:'تثبيت التطبيق',dash:'شاشة عدادات السيارة (BYD)',dashArrows:'أسهم الاتجاه',dashMap:'الأسهم + الخريطة',dashCheck:'فحص',dashTest:'تجربة',dashAdapter:'خدمة أسهم الاتجاه',dashDisplay:'شاشة الخريطة في العدادات',dashNone:'غير موجودة',dashTestNote:'تم إرسال تجربة: انعطاف يمينًا بعد 300 م. انظر إلى شاشة العدادات.',noDashMap:'شاشة العدادات في هذه السيارة لا تدعم عرض الخريطة، لذلك تُعرض أسهم الاتجاه فقط.',testVoice:'تجربة الصوت',installVoice:'إعدادات الصوت',voiceOut:'مخرج الصوت',voiceNav:'الملاحة',voiceMedia:'الوسائط',voiceTesting:'جارٍ تجربة الصوت…',voiceHeard:'نطق درب جملة التجربة. إذا لم تسمع شيئًا فارفع مستوى الصوت أو غيّر مخرج الصوت.',volZero:'نطق درب الجملة لكن صوت الوسائط على الصفر. ارفعه.',noEngine:'لا يوجد محرك تحويل نص إلى كلام يعمل على هذا الجهاز. اضغط إعدادات الصوت لتثبيته أو تفعيله (مثل خدمات الكلام من Google).',voiceEngine:'محرك الصوت',voiceArabic:'الصوت العربي',voiceVolume:'صوت الوسائط',arYes:'مثبّت',arData:'يحتاج تنزيل',arNo:'غير متوفر',voiceTest:'التوجيه الصوتي يعمل',noArVoice:'لا يوجد صوت عربي مثبّت على هذا الجهاز، لذلك تُقرأ التعليمات بالإنجليزية. اضغط إعدادات الصوت في الإعدادات لإضافة العربية.',voiceFail:'تعذّر تشغيل التوجيه الصوتي. تحقّق من إعدادات تحويل النص إلى كلام في الجهاز.',voiceErr:'مشكلة في الصوت',mapView:'عرض الخريطة',m3d:'ثلاثي الأبعاد',flat:'مسطّح',no3d:'هذا الجهاز لا يدعم الخريطة ثلاثية الأبعاد، لذلك تُستخدم الخريطة المسطّحة.',account:'الحساب',signIn:'تسجيل الدخول عبر Google',signOut:'تسجيل الخروج',signedIn:'تم تسجيل الدخول',signedOut:'تم تسجيل الخروج',signInWhy:'اختياري: يتيح لك مشاركة حالة المرور والبلاغات مع السائقين الآخرين.',signInFail:'تعذّر تسجيل الدخول. حاول مجددًا.',shareTraffic:'مشاركة سرعة المرور دون الكشف عن هويتك',signInToShare:'تم الحفظ على هذا الهاتف. سجّل الدخول من الإعدادات لمشاركة البلاغات مع السائقين الآخرين.',notThere:'غير موجود',thanks:'شكرًا على التحديث',
 shareEta:'مشاركة وقت الوصول',eta:(p,c)=>`أنا في الطريق إلى ${p}. الوصول حوالي ${c}.`,copied:'تم النسخ',overSpeed:'خفّف السرعة، تجاوزت الحد المسموح',longPress:'نصيحة: اضغط مطولًا على الخريطة لتحديد نقطة',
 about:'بيانات الخريطة © مساهمو OpenStreetMap · التوجيه: OSRM · البحث: Photon وNominatim.',aboutLocal:'البلاغات محفوظة على هذا الهاتف فقط.',aboutCloud:'البلاغات المشتركة وسرعات المرور المجهولة محفوظة في قاعدة بيانات درب على Supabase. عيّنات المرور لا تحمل أي معلومات عن الحساب.'}
 };
@@ -214,7 +214,7 @@ let tT=null;function toast(m,ms=2500){const el=$('#toast');el.textContent=m;el.h
 // ── Platform: inside the Android app (Capacitor) or a normal browser ──
 const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
 const plugin=n=>NATIVE&&Capacitor.registerPlugin?Capacitor.registerPlugin(n):null;
-const TTS=plugin('TextToSpeech'),KEEP=plugin('KeepAwake'),APP=plugin('App'),BROWSER=plugin('Browser'),DASH=plugin('Dashboard'),BGNAV=plugin('NavBackground');
+const VOICE=plugin('Voice'),KEEP=plugin('KeepAwake'),APP=plugin('App'),BROWSER=plugin('Browser'),DASH=plugin('Dashboard'),BGNAV=plugin('NavBackground');
 // index.html?cluster=1 is the map page the APK shows on the car's instrument cluster (see DashboardPlugin.java).
 const CLUSTER=/[?&]cluster=1(&|$)/.test(location.search);
 
@@ -425,20 +425,35 @@ if('speechSynthesis' in window){loadV();speechSynthesis.onvoiceschanged=loadV}
 const withLang=(l,f)=>{const o=S.lang;S.lang=l;try{return f()}finally{S.lang=o}};
 let ttsEnglish=false,voiceProblem='',voiceWarned=false;
 function voiceIssue(k){voiceProblem=k;if(!voiceWarned){voiceWarned=true;toast(t(k),6000)}if(sheetState==='settings')sheet('settings')}
-// Android text-to-speech. Retries while the engine is still starting; falls back to English if Arabic isn't installed.
-async function ttsSay(txt,queue,tries){
+// Android text-to-speech (Voice plugin, which waits for the engine to start). Falls back to English if Arabic isn't
+// installed. Resolves {ok:true} or {ok:false, code, msg}.
+async function ttsSay(txt,queue){
  const lang=AR()&&!ttsEnglish?'ar-SA':'en-US',text=typeof txt==='function'?(AR()&&lang==='en-US'?withLang('en',txt):txt()):txt;
- try{await TTS.speak({text,lang,rate:1,pitch:1,volume:1,category:'playback',queueStrategy:queue?1:0});if(voiceProblem==='voiceFail'){voiceProblem='';voiceWarned=false}}
- catch(e){const m=String(e&&e.message||e);
-  if(/not yet initialized|not available/i.test(m)&&tries<4){setTimeout(()=>ttsSay(txt,queue,tries+1),700);return}
-  if(/language is not supported/i.test(m)&&lang==='ar-SA'){ttsEnglish=true;voiceIssue('noArVoice');if(typeof txt==='function')ttsSay(txt,queue,tries);return}
-  console.warn('TTS failed:',m);voiceIssue('voiceFail')}}
+ try{await VOICE.speak({text,lang,queue:!!queue,channel:S.voiceOut==='media'?'media':'nav'});if(/voiceFail|noEngine/.test(voiceProblem)){voiceProblem='';voiceWarned=false}return{ok:true}}
+ catch(e){const code=String(e&&e.code||''),m=String(e&&e.message||e);
+  if(/^LANG/.test(code)&&lang==='ar-SA'){ttsEnglish=true;voiceIssue('noArVoice');if(typeof txt==='function')return ttsSay(txt,queue);return{ok:false,code,msg:m}}
+  console.warn('TTS failed:',code,m);voiceIssue(/NO_ENGINE|STARTING/.test(code)?'noEngine':'voiceFail');return{ok:false,code,msg:m}}}
+let voiceInfo=null;
+async function voiceCheck(){if(!VOICE)return;try{voiceInfo=await VOICE.info()}catch(e){voiceInfo={error:String(e&&e.message||e)}}}
+// Settings → Test voice: always reports what happened, not only the first problem.
+async function testVoice(){unlockAudio();if(!S.voice){S.voice=true;saveS();updVol()}
+ if(!VOICE){if(!('speechSynthesis' in window)){toast(t('voiceFail'),6000);return}speak(()=>t('voiceTest'));return}
+ ttsEnglish=false;voiceWarned=true;toast(t('voiceTesting'),9000);
+ const r=await ttsSay(()=>t('voiceTest'));await voiceCheck();
+ if(r.ok)toast(ttsEnglish?t('noArVoice'):voiceInfo&&voiceInfo.volume===0?t('volZero'):t('voiceHeard'),8000);
+ else toast(t(voiceProblem||'voiceFail')+(r.code?' ('+r.code+')':''),9000);
+ if(sheetState==='settings')sheet('settings')}
+async function voiceSettings(){if(!VOICE)return;if(!voiceInfo)await voiceCheck();const v=voiceInfo||{};
+ const what=v.engines&&!v.engines.length?'engine':v.status==='ok'&&v.ar!=='yes'?'install':'settings';VOICE.openSettings({what}).catch(()=>toast(t('voiceFail')))}
+function voiceInfoHtml(){const v=voiceInfo;if(!v)return'';const en=(v.engines||[]).find(e=>e.name===v.engine);
+ const eng=en?en.label:v.engine||((v.engines||[]).map(e=>e.label).join(', ')||t('dashNone')),ar={yes:t('arYes'),'missing-data':t('arData'),no:t('arNo')}[v.ar]||'—';
+ return`<div class="pa">${esc(t('voiceEngine'))}: ${esc(eng)}<br>${esc(t('voiceArabic'))}: ${esc(ar)}${v.volumeMax?`<br>${esc(t('voiceVolume'))}: ${v.volume}/${v.volumeMax}`:''}${v.error?`<br><small dir="ltr">${esc(v.error)}</small>`:''}</div>`}
 function speak(txt,queue){if(!S.voice||!txt)return;
- if(TTS){ttsSay(txt,queue,0);return}
+ if(VOICE){ttsSay(txt,queue);return}
  if(typeof txt==='function')txt=txt();
  if(!('speechSynthesis' in window))return;try{if(!queue)speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang=AR()?'ar-SA':'en-US';const v=voices.find(v=>(v.lang||'').toLowerCase().startsWith(S.lang));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
 let actx=null;
-function unlockAudio(){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();actx.resume()}catch(e){}if(TTS)return;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}}
+function unlockAudio(){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();actx.resume()}catch(e){}if(VOICE)return;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}}
 function beep(){if(!actx||!S.voice)return;try{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;g.gain.value=.15;o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+.3)}catch(e){}}
 const updVol=()=>{$('#volI').className='ti '+(S.voice?'ti-volume':'ti-volume-off')};
 
@@ -752,7 +767,7 @@ const SHEETS={
  report:()=>`<div class="ph"><div class="h">${esc(t('report'))}</div><button class="ib" data-act="closeReport">${X}</button></div><div class="grid">${Object.keys(RT).map(k=>`<button class="rb" data-act="addRep" data-k="${k}"><i class="ti ${RT[k][0]}" style="background:${RT[k][1]}"></i>${esc(t(k))}</button>`).join('')}</div>`,
  settings:()=>{const seg=(k,o)=>`<div class="seg">${o.map(([v,l])=>`<button class="${S[k]===v?'on':''}" data-act="set" data-k="${k}" data-v="${v}">${esc(l)}</button>`).join('')}</div>`;return`<div class="ph"><div class="h">${esc(t('settings'))}</div><button class="ib" data-act="close">${X}</button></div>
   <div class="set"><label>${esc(t('lang'))}</label>${seg('lang',[['ar','العربية'],['en','English']])}</div>
-  <div class="set"><label>${esc(t('voice'))}</label>${seg('voice',[[true,t('on')],[false,t('off')]])}<div class="row" style="margin-top:8px"><button class="btn" data-act="testVoice"><i class="ti ti-volume"></i>${esc(t('testVoice'))}</button>${TTS?`<button class="btn" data-act="installVoice"><i class="ti ti-download"></i>${esc(t('installVoice'))}</button>`:''}</div>${voiceProblem?`<div class="pa" style="color:#e03131">${esc(t('voiceErr'))}: ${esc(t(voiceProblem))}</div>`:''}</div>
+  <div class="set"><label>${esc(t('voice'))}</label>${seg('voice',[[true,t('on')],[false,t('off')]])}<div class="row" style="margin-top:8px"><button class="btn" data-act="testVoice"><i class="ti ti-volume"></i>${esc(t('testVoice'))}</button>${VOICE?`<button class="btn" data-act="installVoice"><i class="ti ti-settings"></i>${esc(t('installVoice'))}</button>`:''}</div>${VOICE?`<div style="margin-top:8px"><small>${esc(t('voiceOut'))}</small>${seg('voiceOut',[['nav',t('voiceNav')],['media',t('voiceMedia')]])}</div>`:''}${voiceProblem?`<div class="pa" style="color:#e03131">${esc(t('voiceErr'))}: ${esc(t(voiceProblem))}</div>`:''}${voiceInfoHtml()}</div>
   <div class="set"><label>${esc(t('mapView'))}</label>${seg('map3d',[[true,t('m3d')],[false,t('flat')]])}</div>
   ${DASH?`<div class="set"><label>${esc(t('dash'))}</label>${seg('dash',[['off',t('off')],['arrows',t('dashArrows')],['map',t('dashMap')]])}<div class="row" style="margin-top:8px"><button class="btn" data-act="dashTest"><i class="ti ti-steering-wheel"></i>${esc(t('dashTest'))}</button><button class="btn" data-act="dashCheck"><i class="ti ti-search"></i>${esc(t('dashCheck'))}</button></div>${dashInfo?`<div class="pa">${dashInfo.error?esc(dashInfo.error):`${esc(t('dashAdapter'))}: ${esc(dashInfo.amap||t('dashNone'))}<br>${esc(t('dashDisplay'))}: ${esc(dashInfo.cluster||t('dashNone'))}<br><small dir="ltr">${esc((dashInfo.displays||[]).map(d=>d.name+' '+d.w+'×'+d.h).join(' · '))}</small>`}</div>`:''}</div>`:''}
   <div class="set"><label>${esc(t('night'))}</label>${seg('night',[['auto',t('auto')],['on',t('on')],['off',t('off')]])}</div>
@@ -791,9 +806,9 @@ document.addEventListener('click',e=>{
   case 'north':M.north();break;
   case 'dashTest':dashTest();break;
   case 'dashCheck':dashCheck();break;
-  case 'testVoice':unlockAudio();if(!S.voice){S.voice=true;saveS();updVol();sheet('settings')}speak(()=>t('voiceTest'));break;
-  case 'installVoice':if(TTS)TTS.openInstall().catch(()=>{});break;
-  case 'voice':S.voice=!S.voice;saveS();updVol();if(!S.voice){try{speechSynthesis.cancel()}catch(err){}if(TTS)TTS.stop().catch(()=>{})}toast(t('voice')+': '+t(S.voice?'on':'off'));break;
+  case 'testVoice':testVoice();break;
+  case 'installVoice':voiceSettings();break;
+  case 'voice':S.voice=!S.voice;saveS();updVol();if(!S.voice){try{speechSynthesis.cancel()}catch(err){}if(VOICE)VOICE.stop().catch(()=>{})}toast(t('voice')+': '+t(S.voice?'on':'off'));break;
   case 'report':if(sheetState!=='report')prevSheet=sheetState;hideList();sheet('report');break;
   case 'closeReport':restoreSheet();break;
   case 'addRep':addReport(k);restoreSheet();break;

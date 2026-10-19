@@ -64,5 +64,9 @@
     <queries>
         <package android:name="com.byd.amapservice" />
         <package android:name="com.example.amapservice" />
+        <!-- Text-to-speech engines (VoicePlugin). -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
     </queries>
 </manifest>
