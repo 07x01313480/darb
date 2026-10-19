@@ -108,8 +108,14 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;paddin
 .me-arrow{position:absolute;left:7px;top:-9px;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid var(--acc)}
 .pin{width:30px;height:30px;border-radius:50% 50% 50% 0;background:#e03131;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
 .cluster #top,.cluster #fabs,.cluster #spd,.cluster #sheet,.cluster #toast{display:none!important}
-.cluster #banner{inset-inline:auto;left:var(--cl,16px);top:var(--ct,16px);max-width:46%;padding:10px 16px}
-.cluster #btext{font-size:24px}.cluster .mi .ti{font-size:52px}.cluster #bd{font-size:22px}
+/* Cluster turn card: left-middle, clear of the car's own speed bar (top) and range/odometer bar (bottom). Sized in vh/vw so it scales with any cluster screen. */
+.cluster #banner{inset-inline:auto;left:var(--cl,4vw);top:var(--ct,27vh);width:21vw;max-width:none;flex-direction:column;gap:.6vh;padding:2vh 1.2vw 2.4vh;border-radius:2.6vh;background:rgba(15,110,86,.94);text-align:center;box-shadow:0 .6vh 2.4vh rgba(0,0,0,.45)}
+.cluster .mi{min-width:0}.cluster .mi .ti{font-size:15vh}.cluster #bd{font-size:7vh;margin-top:.4vh}
+.cluster #btext{font-size:3.6vh;line-height:1.3;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.cluster #bnext{display:none}
+/* Map credit: small, between the car's centre and right-hand readouts. */
+.cluster .maplibregl-ctrl-bottom-right{right:auto;left:46vw;bottom:1.2vh}.cluster .maplibregl-ctrl-attrib{background:none!important;font-size:1.6vh;opacity:.5;margin:0!important;padding:0!important;min-height:0}
+.cluster .maplibregl-ctrl-attrib-button{display:none!important}.cluster .maplibregl-ctrl-attrib-inner{display:block!important}
+.cluster .leaflet-bottom.leaflet-left{left:46vw;bottom:1.2vh}.cluster .leaflet-control-attribution{background:none!important;font-size:1.6vh;opacity:.5}
 .repm{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:18px;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4)}
 .acct{display:flex;align-items:center;gap:10px}
 .acct img,.acct>.ti{width:40px;height:40px;border-radius:50%;font-size:40px;color:var(--mut);flex:none}
@@ -842,12 +848,13 @@ if(CLUSTER){
  window.darbCluster=json=>{const s=JSON.parse(json);last=s;
   if(s.lang&&s.lang!==S.lang){S.lang=s.lang;applyLang()}
   document.body.classList.toggle('dark',!!s.dark);M.theme(!!s.dark);
-  if(s.inset){document.documentElement.style.setProperty('--ct',s.inset.top+'px');document.documentElement.style.setProperty('--cl',s.inset.left+'px')}
+  if(s.inset)document.documentElement.style.setProperty('--ct','calc('+s.inset.top+'px + 4vh)');
   if(!started){started=true;S.map3d=s.map3d!==false;M.start(S.map3d).then(camera)} // first frame arrives before the engine is ready
   if(s.route&&(s.rv!==rv||!M._st.routes.length)){rv=s.rv;M.routes([s.route.ll],0,s.route.runs||[])}
   if(s.dest)M.marker('dest',{ll:s.dest,html:'<div class="pin"></div>',size:[30,30],anchor:'bottom',lift:6,z:500});
   if(s.me){me=s.me;meHead=s.head;meSpeed=s.speed||0;meAcc=0;drawMe();M.follow(me,s.z||17,meHead,true,S.map3d!==false)}
-  $('#banner').hidden=true}; // the car's own guidance card shows the next turn on the cluster
+  // Darb's own turn card: the car does not show a guidance card for third-party apps on this model.
+  const b=s.banner;$('#banner').hidden=!b;if(b){$('#bi').className='ti '+b.icon;$('#bd').textContent=b.dist||'';$('#btext').textContent=b.text||''}};
  applyLang();
 }else{
 M.start(S.map3d!==false).then(n=>{if(S.map3d!==false&&n!=='gl'&&!LS.get('no3dTold',false)){toast(t('no3d'),4500);LS.set('no3dTold',true)}});
