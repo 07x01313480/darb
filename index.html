@@ -18,7 +18,7 @@ body.dark{--bg:#0f1114;--fg:#eceef1;--mut:#9aa0a8;--line:rgba(255,255,255,.1);--
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Arabic",Tahoma,sans-serif}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
 #map{position:fixed;inset:0;background:var(--bg);direction:ltr}
-.dark .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
+.dark.osm .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
 .leaflet-bottom{bottom:var(--sheet-h)}
 .leaflet-control-attribution{font-size:10px}
 .dark .leaflet-control-attribution{background:rgba(20,22,26,.8)!important;color:#aaa}
@@ -189,10 +189,17 @@ let tT=null;function toast(m,ms=2500){const el=$('#toast');el.textContent=m;el.h
 
 const map=L.map('map',{zoomControl:false}).setView([33.3152,44.3661],12);
 map.attributionControl.setPrefix('<a href="https://leafletjs.com">Leaflet</a>').setPosition('bottomleft');
-// Keyless OpenStreetMap tiles. (CARTO basemaps now need an API key and watermark tiles without one.)
-// Night mode darkens these tiles with a CSS filter (.dark .leaflet-tile-pane).
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
-function applyTheme(){const h=new Date().getHours(),dark=S.night==='on'||(S.night==='auto'&&(h<6||h>=18));document.body.classList.toggle('dark',dark)}
+// CARTO basemaps need an API key (passed as ?key=); without it tiles show an "API key required" watermark.
+// Public client-side key: restrict it to this site's domain in the CARTO dashboard. Empty string = use OSM tiles only.
+const CARTO_KEY='cb1_4osj_1_a661b0f62a73557fbb98ca0e';
+const OSMA='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',CA=OSMA+' &copy; <a href="https://carto.com/attributions">CARTO</a>';
+const LAYERS={
+ day:L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key='+CARTO_KEY,{maxZoom:20,subdomains:'abcd',attribution:CA}),
+ night:L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key='+CARTO_KEY,{maxZoom:20,subdomains:'abcd',attribution:CA}),
+ osm:L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:OSMA})};
+let curLayer=null,useOSM=!CARTO_KEY,tileErr=0;
+[LAYERS.day,LAYERS.night].forEach(l=>l.on('tileerror',()=>{if(++tileErr>12&&!useOSM){useOSM=true;applyTheme()}}));
+function applyTheme(){const h=new Date().getHours(),dark=S.night==='on'||(S.night==='auto'&&(h<6||h>=18));document.body.classList.toggle('dark',dark);document.body.classList.toggle('osm',useOSM);const w=useOSM?LAYERS.osm:dark?LAYERS.night:LAYERS.day;if(w!==curLayer){if(curLayer)map.removeLayer(curLayer);curLayer=w.addTo(map)}}
 setInterval(applyTheme,300000);
 const routeG=L.layerGroup().addTo(map),poiG=L.layerGroup().addTo(map),repG=L.layerGroup().addTo(map);
 let destM=null,meM=null,accC=null;

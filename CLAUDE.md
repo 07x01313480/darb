@@ -7,7 +7,7 @@ Single-file web app: everything (HTML, CSS, JS) is in `index.html`. No build ste
 - **Storage** — `LS` wraps `localStorage` with the `darb.` prefix. `S` = settings (`lang`, `voice`, `night`), `P` = places (`home`, `work`, `favs`), plus `recents` and `reports`.
 - **i18n** — `I18N.en` / `I18N.ar`, read through `t(key, ...args)`. Some entries are functions. Every user-facing string must exist in both languages. `AR()` checks the current language; `applyLang()` sets `dir="rtl"` and refreshes `[data-t]` / `[data-tp]` elements.
 - **Geo helpers** — `dist` (haversine, metres), `bearing`, `projSeg` (project point onto segment).
-- **Map** — Leaflet with keyless OpenStreetMap tiles. `applyTheme()` toggles `body.dark`, which darkens the tile pane with a CSS filter. CARTO basemaps were dropped in Oct 2026 because they now require an API key and watermark tiles without one.
+- **Map** — Leaflet; tile layers in `LAYERS`: CARTO Voyager (day) / Dark Matter (night), with OSM as fallback after repeated tile errors. CARTO requires an API key (`CARTO_KEY`, appended as `?key=`) and watermarks tiles without one; an empty `CARTO_KEY` means OSM only. On OSM, night mode darkens tiles with a CSS filter (`.dark.osm`). `applyTheme()` picks the layer.
 - **GPS** — `startGPS` → `onFix` computes speed/heading (falls back to deltas between fixes), then drives `followMe`, `navUpdate` or `freeAlerts`, and `maybeLimit`.
 - **Search** — `geocode` (Photon → Nominatim), `reverse` (Nominatim), result list in `#results`.
 - **Routing** — `fetchRoutes` tries `ROUTERS` in order; `prepRoute` builds `ll` (lat/lng array), `cum` (cumulative distance), `steps`, and `sa` (distance-along of each step's maneuver).

@@ -38,7 +38,7 @@ python3 -m http.server 8000
 | Concern | Service |
 | --- | --- |
 | Map rendering | [Leaflet](https://leafletjs.com) 1.9.4 |
-| Map tiles | OpenStreetMap standard tiles (no key); night mode darkens them with a CSS filter |
+| Map tiles | CARTO Voyager / Dark Matter (free API key in `CARTO_KEY`), falling back to OpenStreetMap |
 | Search | [Photon](https://photon.komoot.io), fallback [Nominatim](https://nominatim.org) |
 | Routing | OSRM via routing.openstreetmap.de, fallback router.project-osrm.org |
 | Speed limits, nearby places | Overpass API |
