@@ -204,7 +204,7 @@ const TTS=plugin('TextToSpeech'),KEEP=plugin('KeepAwake'),APP=plugin('App'),BROW
 
 // ── Cloud (Supabase): optional Google sign-in, live traffic, shared reports ──
 // Project URL and publishable (anon) key from Supabase → Project Settings → API keys. Both empty = device-only mode.
-const SB_URL='',SB_KEY='';
+const SB_URL='https://qxxnyhwifclvrdwsurqo.supabase.co',SB_KEY='sb_publishable_HzZ42XCdNcpRxt5cTkx3sw_tdJ1ek0D';
 const AUTH_REDIRECT_APP='darb://auth';
 const CLOUD=!!(SB_URL&&SB_KEY&&window.supabase);
 const sb=CLOUD?supabase.createClient(SB_URL,SB_KEY,{auth:{flowType:'pkce',detectSessionInUrl:!NATIVE,persistSession:true,autoRefreshToken:true}}):null;
