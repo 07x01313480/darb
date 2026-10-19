@@ -7,7 +7,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Darb">
+<meta name="description" content="Bilingual Arabic / English turn-by-turn driving navigation on OpenStreetMap.">
 <title>Darb · درب</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
 <style>
@@ -153,7 +157,7 @@ noRoute:"Couldn't find a route. Check your connection and try again.",noGps:'Wai
 arrive:'Arrival',time:'Time',dist:'Distance',min:'min',h:'h',m:'m',km:'km',then:'Then',via:'via',fastest:'Fastest',
 rerouting:'Rerouting…',arrived:'You have arrived',setHome:'Set as home',setWork:'Set as work',setHomeFirst:'Search or long-press a place, then tap "Set as home" or "Set as work".',
 reported:'Report added',removed:'Removed',ahead:x=>`${x} reported ahead`,ago:n=>`${n} min ago`,
-settings:'Settings',lang:'Language',voice:'Voice guidance',night:'Night mode',auto:'Auto',on:'On',off:'Off',clearReports:'Clear all reports',
+settings:'Settings',lang:'Language',voice:'Voice guidance',night:'Night mode',auto:'Auto',on:'On',off:'Off',clearReports:'Clear all reports',install:'Install app',
 shareEta:'Share ETA',eta:(p,c)=>`I'm on my way to ${p}. Arriving around ${c}.`,copied:'Copied',overSpeed:'Slow down, you are over the speed limit',longPress:'Tip: long-press the map to drop a pin',
 about:'Map data © OpenStreetMap contributors · Routing: OSRM · Search: Photon and Nominatim. Reports are stored on this phone only.'},
 ar:{search:'ابحث عن مكان',home:'البيت',work:'العمل',fuel:'وقود',parking:'موقف سيارات',hospital:'مستشفى',atm:'صراف آلي',kmh:'كم/س',
@@ -164,7 +168,7 @@ noRoute:'تعذّر إيجاد طريق. تحقّق من الاتصال وحاو
 arrive:'الوصول',time:'المدة',dist:'المسافة',min:'د',h:'س',m:'م',km:'كم',then:'ثم',via:'عبر',fastest:'الأسرع',
 rerouting:'جارٍ إعادة حساب المسار…',arrived:'لقد وصلت إلى وجهتك',setHome:'تعيين كبيت',setWork:'تعيين كعمل',setHomeFirst:'ابحث عن مكان أو اضغط مطولًا على الخريطة، ثم اختر "تعيين كبيت" أو "تعيين كعمل".',
 reported:'تمت إضافة البلاغ',removed:'تم الحذف',ahead:x=>`انتبه: ${x} في الطريق أمامك`,ago:n=>`منذ ${n} د`,
-settings:'الإعدادات',lang:'اللغة',voice:'التوجيه الصوتي',night:'الوضع الليلي',auto:'تلقائي',on:'تشغيل',off:'إيقاف',clearReports:'حذف كل البلاغات',
+settings:'الإعدادات',lang:'اللغة',voice:'التوجيه الصوتي',night:'الوضع الليلي',auto:'تلقائي',on:'تشغيل',off:'إيقاف',clearReports:'حذف كل البلاغات',install:'تثبيت التطبيق',
 shareEta:'مشاركة وقت الوصول',eta:(p,c)=>`أنا في الطريق إلى ${p}. الوصول حوالي ${c}.`,copied:'تم النسخ',overSpeed:'خفّف السرعة، تجاوزت الحد المسموح',longPress:'نصيحة: اضغط مطولًا على الخريطة لتحديد نقطة',
 about:'بيانات الخريطة © مساهمو OpenStreetMap · التوجيه: OSRM · البحث: Photon وNominatim. البلاغات محفوظة على هذا الهاتف فقط.'}
 };
@@ -409,7 +413,7 @@ const SHEETS={
   <div class="set"><label>${esc(t('lang'))}</label>${seg('lang',[['ar','العربية'],['en','English']])}</div>
   <div class="set"><label>${esc(t('voice'))}</label>${seg('voice',[[true,t('on')],[false,t('off')]])}</div>
   <div class="set"><label>${esc(t('night'))}</label>${seg('night',[['auto',t('auto')],['on',t('on')],['off',t('off')]])}</div>
-  <div class="row"><button class="btn" data-act="clearReps"><i class="ti ti-trash"></i>${esc(t('clearReports'))}</button></div>
+  <div class="row">${installEvt?`<button class="btn pri" data-act="install"><i class="ti ti-download"></i>${esc(t('install'))}</button>`:''}<button class="btn" data-act="clearReps"><i class="ti ti-trash"></i>${esc(t('clearReports'))}</button></div>
   <div class="pa" style="margin-top:14px">${esc(t('about'))}</div>`},
  nearby:()=>`<div class="ph"><div class="h">${esc(t(nearKey))}</div><button class="ib" data-act="closeNear">${X}</button></div>${nearList.length?nearList.map((p,i)=>`<button class="it" data-act="pickNear" data-i="${i}"><i class="ti ${p.icon}"></i><div><b>${esc(p.name)}</b><small>${esc(p.addr)}</small></div><span class="d">${fmtDist(p.d)}</span></button>`).join(''):`<div class="msg">${esc(t('nothingNear'))}</div>`}`
 };
@@ -445,10 +449,17 @@ document.addEventListener('click',e=>{
   case 'addRep':addReport(k);restoreSheet();break;
   case 'rmrep':reports=reports.filter(x=>x.id!==b.dataset.id);LS.set('reports',reports);map.closePopup();drawReports();toast(t('removed'));break;
   case 'clearReps':reports=[];LS.set('reports',reports);drawReports();toast(t('removed'));break;
+  case 'install':if(installEvt){const ev=installEvt;installEvt=null;ev.prompt();ev.userChoice.finally(()=>{if(sheetState==='settings')sheet('settings')})}break;
  }
 },true);
 
 function applyLang(){document.documentElement.lang=S.lang;document.documentElement.dir=AR()?'rtl':'ltr';document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));document.querySelectorAll('[data-tp]').forEach(e=>e.placeholder=t(e.dataset.tp));drawReports()}
+
+// PWA: offline app shell + "Install app" button in Settings when the browser offers installation.
+let installEvt=null;
+window.addEventListener('beforeinstallprompt',e=>{installEvt=e;if(sheetState==='settings')sheet('settings')});
+window.addEventListener('appinstalled',()=>{installEvt=null;if(sheetState==='settings')sheet('settings')});
+if('serviceWorker' in navigator&&window.isSecureContext)navigator.serviceWorker.register('sw.js').catch(()=>{});
 
 applyLang();applyTheme();updVol();startGPS();
 if(!LS.get('tip',false)){setTimeout(()=>toast(t('longPress'),4500),1500);LS.set('tip',true)}

@@ -1,6 +1,6 @@
 # Darb — development notes
 
-Single-file web app: everything (HTML, CSS, JS) is in `index.html`. No build step, no dependencies to install. Deployed by GitHub Pages from the `main` branch root.
+Single-file web app: everything (HTML, CSS, JS) is in `index.html`, plus PWA files: `manifest.webmanifest`, `sw.js` (service worker) and `icons/`. No build step, no dependencies to install. Deployed by GitHub Pages from the `main` branch root.
 
 ## Code map (index.html)
 
@@ -16,6 +16,12 @@ Single-file web app: everything (HTML, CSS, JS) is in `index.html`. No build ste
 - **Reports** — `RT` defines types as `[icon, color, lifetimeMs]` (0 = permanent). Device-local only.
 - **Nearby** — `NEAR` holds Overpass filters per category.
 - **UI** — bottom sheet rendered from `SHEETS[name]()` via `sheet(name)`. All clicks go through one delegated handler keyed on `data-act`.
+
+## PWA
+
+- `sw.js` precaches the app shell and the Leaflet / Tabler CDN files; pages are network-first, static files stale-while-revalidate. Tiles and API calls are never intercepted.
+- **Bump `VERSION` in `sw.js`** whenever `sw.js` or its precache lists change. `index.html` changes need no bump (network-first).
+- `beforeinstallprompt` is stored in `installEvt`; Settings shows an Install app button while it's available.
 
 ## Conventions
 
