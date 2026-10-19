@@ -27,6 +27,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -60,23 +61,31 @@ public class VoicePlugin extends Plugin {
     private final Map<String, PluginCall> pending = new HashMap<>();
     private final Set<String> active = new HashSet<>();
     private int seq;
+    /** Engine package asked for by the page ("" = system default). */
+    private String engineReq = "";
+    /** How the last successful speak() call was made, for diagnostics. */
+    private String okMode = "";
+    /** Calls already retried once after restarting the engine. */
+    private final Map<PluginCall, Boolean> retried = new IdentityHashMap<>();
     private AudioFocusRequest focusReq;
     private final AudioManager.OnAudioFocusChangeListener focusListener = change -> {};
     private boolean focused;
 
     @Override
     public void load() {
-        main.post(this::initTts);
+        main.post(() -> initTts(engineReq));
     }
 
-    private void initTts() {
+    private void initTts(String engine) {
+        engineReq = engine == null ? "" : engine;
         if (tts != null) try { tts.shutdown(); } catch (Exception ignored) {}
         tts = null;
         status = STARTING;
         initAt = System.currentTimeMillis();
         final int gen = ++initGen;
         try {
-            tts = new TextToSpeech(getContext(), st -> main.post(() -> onInit(gen, st)));
+            TextToSpeech.OnInitListener l = st -> main.post(() -> onInit(gen, st));
+            tts = engineReq.isEmpty() ? new TextToSpeech(getContext(), l) : new TextToSpeech(getContext(), l, engineReq);
         } catch (Exception e) {
             lastError = "engine: " + e.getMessage();
             onInit(gen, TextToSpeech.ERROR);
@@ -110,13 +119,13 @@ public class VoicePlugin extends Plugin {
         });
         List<PluginCall> calls = new ArrayList<>(waiting);
         waiting.clear();
-        for (PluginCall c : calls) doSpeak(c);
+        for (PluginCall c : calls) doSpeak(c, retried.remove(c) != null);
     }
 
     private void rejectWaiting(String msg, String code) {
         List<PluginCall> calls = new ArrayList<>(waiting);
         waiting.clear();
-        for (PluginCall c : calls) c.reject(msg, code);
+        for (PluginCall c : calls) { retried.remove(c); c.reject(msg, code); }
     }
 
     @PluginMethod
@@ -124,15 +133,18 @@ public class VoicePlugin extends Plugin {
         main.post(() -> {
             String text = call.getString("text", "");
             if (text == null || text.trim().isEmpty()) { call.resolve(); return; }
-            if (status == OK) { doSpeak(call); return; }
+            String engine = call.getString("engine", "");
+            if (engine == null) engine = "";
+            if (!engine.equals(engineReq)) { waiting.add(call); flush(); initTts(engine); return; }
+            if (status == OK) { doSpeak(call, false); return; }
             waiting.add(call);
             // Failed earlier (engine not ready when the app started, or just installed): try again.
-            if (status == FAILED && System.currentTimeMillis() - initAt > REINIT_GAP_MS) initTts();
+            if (status == FAILED && System.currentTimeMillis() - initAt > REINIT_GAP_MS) initTts(engineReq);
             else if (status == FAILED) rejectWaiting("no working text-to-speech engine", "NO_ENGINE");
         });
     }
 
-    private void doSpeak(PluginCall call) {
+    private void doSpeak(PluginCall call, boolean afterRestart) {
         String text = call.getString("text", "");
         String lang = call.getString("lang", "en-US");
         boolean queue = Boolean.TRUE.equals(call.getBoolean("queue", false));
@@ -144,22 +156,51 @@ public class VoicePlugin extends Plugin {
         if (av < TextToSpeech.LANG_AVAILABLE) { call.reject("language " + lang + " is not supported", "LANG"); return; }
         try { tts.setLanguage(loc); } catch (Exception ignored) {}
         AudioAttributes attrs = attributes(media);
-        try { tts.setAudioAttributes(attrs); } catch (Exception ignored) {}
         if (!queue) flush();
         String id = "u" + (++seq);
         pending.put(id, call);
         active.add(id);
         requestFocus(attrs);
-        Bundle params = new Bundle();
-        params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, id);
-        int r;
-        try { r = tts.speak(text, queue ? TextToSpeech.QUEUE_ADD : TextToSpeech.QUEUE_FLUSH, params, id); }
-        catch (Exception e) { r = TextToSpeech.ERROR; }
+        int mode = queue ? TextToSpeech.QUEUE_ADD : TextToSpeech.QUEUE_FLUSH;
+        // Some head-unit engines refuse a request that a phone engine accepts, so try progressively plainer ones.
+        int r = TextToSpeech.ERROR;
+        try { tts.setAudioAttributes(attrs); } catch (Exception ignored) {}
+        try {
+            Bundle params = new Bundle();
+            params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, id);
+            r = tts.speak(text, mode, params, id);
+            if (r == TextToSpeech.SUCCESS) okMode = media ? "media" : "nav";
+        } catch (Exception ignored) {}
+        if (r != TextToSpeech.SUCCESS && !media) {
+            try {
+                tts.setAudioAttributes(attributes(true));
+                Bundle params = new Bundle();
+                params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, id);
+                r = tts.speak(text, mode, params, id);
+                if (r == TextToSpeech.SUCCESS) okMode = "media (fallback)";
+            } catch (Exception ignored) {}
+        }
+        if (r != TextToSpeech.SUCCESS) {
+            try {
+                HashMap<String, String> legacy = new HashMap<>();
+                legacy.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, id);
+                legacy.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(AudioManager.STREAM_MUSIC));
+                r = tts.speak(text, mode, legacy);
+                if (r == TextToSpeech.SUCCESS) okMode = "legacy";
+            } catch (Exception ignored) {}
+        }
         if (r != TextToSpeech.SUCCESS) {
             pending.remove(id);
             active.remove(id);
             releaseFocusIfIdle();
-            lastError = "speak() failed";
+            if (!afterRestart) {
+                // The connection to the engine may have dropped since it started: restart it and try once more.
+                retried.put(call, Boolean.TRUE);
+                waiting.add(call);
+                initTts(engineReq);
+                return;
+            }
+            lastError = "speak() failed" + (engineReq.isEmpty() ? "" : " (" + engineReq + ")");
             call.reject("the voice engine refused to speak", "SPEAK_FAILED");
             return;
         }
@@ -246,6 +287,8 @@ public class VoicePlugin extends Plugin {
         main.post(() -> {
             JSObject o = new JSObject();
             o.put("status", status == OK ? "ok" : status == STARTING ? "starting" : "failed");
+            o.put("engineReq", engineReq);
+            if (!okMode.isEmpty()) o.put("mode", okMode);
             if (!lastError.isEmpty()) o.put("error", lastError);
             JSArray engines = new JSArray();
             PackageManager pm = getContext().getPackageManager();
