@@ -1,28 +1,25 @@
-// Darb service worker: keeps the app shell and its libraries available offline.
-// Map tiles, search, routing and Overpass requests are not intercepted; they always go to the network.
+// Darb service worker: keeps the app shell and its bundled libraries (vendor/) available offline.
+// Map tiles, search, routing, Overpass and Supabase requests are not intercepted; they always go to the network.
 // Bump VERSION whenever this file or the precache list changes.
-const VERSION = 'darb-v1';
+const VERSION = 'darb-v2';
 
 const SHELL = [
   './',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/icon-maskable-512.png'
+  './icons/icon-maskable-512.png',
+  './vendor/leaflet/leaflet.css',
+  './vendor/leaflet/leaflet.js',
+  './vendor/tabler/tabler-icons.min.css',
+  './vendor/tabler/fonts/tabler-icons.woff2',
+  './vendor/supabase/supabase.js'
 ];
-const LIBS = [
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-  'https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css'
-];
-const LIB_HOSTS = ['unpkg.com', 'cdn.jsdelivr.net'];
 
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
     const c = await caches.open(VERSION);
     await c.addAll(SHELL);
-    // Libraries are best-effort: a CDN hiccup must not block installation.
-    await Promise.all(LIBS.map(u => c.add(u).catch(() => {})));
     await self.skipWaiting();
   })());
 });
@@ -64,7 +61,7 @@ self.addEventListener('fetch', e => {
   const url = new URL(req.url);
   if (req.mode === 'navigate' && url.origin === self.location.origin) {
     e.respondWith(networkFirstPage(e));
-  } else if (url.origin === self.location.origin || LIB_HOSTS.includes(url.hostname)) {
+  } else if (url.origin === self.location.origin) {
     e.respondWith(staleWhileRevalidate(e));
   }
 });

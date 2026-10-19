@@ -1,0 +1,100 @@
+name: Android APK
+
+# Builds the Darb APK on every push to main.
+# With the DARB_KEYSTORE_PASSWORD secret set, it signs a release APK and publishes it as a GitHub Release
+# (stable download link: https://github.com/07x01313480/darb/releases/latest/download/darb.apk).
+# Without the secret it builds a debug APK, available only as a workflow artifact.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'supabase/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web bundle and sync it into the Android project
+        run: |
+          npm run build:www
+          npx cap sync android
+
+      - name: Unlock the signing key
+        id: key
+        env:
+          DARB_KEYSTORE_PASSWORD: ${{ secrets.DARB_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$DARB_KEYSTORE_PASSWORD" ]; then
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
+              -in android/release.keystore.enc -out "$RUNNER_TEMP/release.keystore" \
+              -pass env:DARB_KEYSTORE_PASSWORD
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::The DARB_KEYSTORE_PASSWORD secret is not set, so this run builds a debug APK only and publishes nothing. See SETUP.md."
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build APK
+        working-directory: android
+        env:
+          DARB_VERSION_CODE: ${{ github.run_number }}
+          DARB_VERSION_NAME: 1.0.${{ github.run_number }}
+          DARB_KEYSTORE_PASSWORD: ${{ secrets.DARB_KEYSTORE_PASSWORD }}
+          SIGNED: ${{ steps.key.outputs.signed }}
+        run: |
+          chmod +x gradlew
+          if [ "$SIGNED" = "true" ]; then
+            DARB_KEYSTORE_FILE="$RUNNER_TEMP/release.keystore" ./gradlew --no-daemon assembleRelease
+            cp app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/darb.apk"
+          else
+            ./gradlew --no-daemon assembleDebug
+            cp app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/darb-debug.apk"
+          fi
+          rm -f "$RUNNER_TEMP/release.keystore"
+          ls -la "$RUNNER_TEMP"/darb*.apk
+
+      - name: Upload APK as a build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: darb-apk-1.0.${{ github.run_number }}
+          path: ${{ runner.temp }}/darb*.apk
+          retention-days: 30
+
+      - name: Publish GitHub Release
+        if: steps.key.outputs.signed == 'true' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v1.0.${{ github.run_number }}" "$RUNNER_TEMP/darb.apk" \
+            --repo "${{ github.repository }}" \
+            --title "Darb 1.0.${{ github.run_number }}" \
+            --target "${{ github.sha }}" \
+            --latest \
+            --notes "Android APK built from ${{ github.sha }}. Download **darb.apk** below, open it on your phone or car screen, and allow installing from this source if asked. Installing over an earlier version keeps your settings."

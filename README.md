@@ -1,8 +1,10 @@
 # Darb · درب
 
-A lightweight, bilingual (Arabic / English) turn-by-turn driving navigation web app built on OpenStreetMap. It runs entirely in the browser as a single `index.html` — no build step, no backend, no API keys.
+A lightweight, bilingual (Arabic / English) turn-by-turn driving navigation app built on OpenStreetMap. It runs in the browser as a single `index.html` with no build step, installs as a PWA, and is also packaged as an Android APK. An optional Supabase backend adds Google sign-in, live traffic from drivers, and shared road reports.
 
-**Live app:** https://07x01313480.github.io/darb/
+**Live app:** https://07x01313480.github.io/darb/  
+**Android APK:** https://github.com/07x01313480/darb/releases/latest/download/darb.apk  
+**First-time setup (signing secret, Supabase, Google sign-in):** see [SETUP.md](SETUP.md)
 
 ## Features
 
@@ -13,7 +15,9 @@ A lightweight, bilingual (Arabic / English) turn-by-turn driving navigation web 
 - Voice guidance in Arabic or English (Web Speech API), with timing scaled to speed
 - Automatic rerouting when you leave the route
 - Speed display, with posted speed limits from OSM and an over-limit warning
-- Hazard reports (jam, police / checkpoint, crash, hazard, closure, speed camera) with alerts ahead — stored on the device only
+- Hazard reports (jam, police / checkpoint, crash, hazard, closure, speed camera) with alerts ahead — shared with other drivers when signed in, otherwise kept on the device
+- Live traffic: signed-in drivers anonymously share their average speed while driving; slow and jammed areas show on the map and on your route
+- Optional Google sign-in (Supabase Auth)
 - Nearby fuel, parking, hospitals and ATMs (Overpass API)
 - Home / Work shortcuts, favourites and recent places
 - Share a place or live ETA
@@ -43,10 +47,28 @@ python3 -m http.server 8000
 | Routing | OSRM via routing.openstreetmap.de, fallback router.project-osrm.org |
 | Speed limits, nearby places | Overpass API |
 | Icons | Tabler Icons webfont |
+| Accounts, traffic, shared reports | [Supabase](https://supabase.com) (Postgres + Auth), schema in `supabase/schema.sql` |
+| Android app | [Capacitor](https://capacitorjs.com) 8, built by GitHub Actions |
 
-All of these are free public services with fair-use limits; heavy use should move to self-hosted or paid equivalents.
+Leaflet, Tabler Icons and supabase-js are bundled in `vendor/`, so the app shell works offline. The map, search, routing and Overpass services are free public services with fair-use limits; heavy use should move to self-hosted or paid equivalents.
 
-Settings, saved places, recents and reports live in the browser's `localStorage` under the `darb.` prefix.
+Settings, saved places, recents and device-only reports live in `localStorage` under the `darb.` prefix.
+
+## Android APK
+
+Every push to `main` runs `.github/workflows/android.yml`, which builds `www/` (the web app with JavaScript lowered for older Android WebViews), wraps it with Capacitor and publishes a signed APK as a GitHub Release. Inside the APK, voice guidance uses Android's text-to-speech and the screen is kept on natively.
+
+Build locally (needs Android SDK + JDK 21):
+
+```sh
+npm ci
+npm run sync
+cd android && ./gradlew assembleDebug
+```
+
+## Privacy
+
+Traffic samples are sent only when signed in, sharing is on, and the car is moving. Each sample is the average speed over the last minute at a position the server turns into a ~150 m grid cell; no account ID is stored with it, and samples are deleted after 8 days. Shared reports keep the author's ID so they can delete their own, but it's never shown to other users.
 
 ## Credits
 

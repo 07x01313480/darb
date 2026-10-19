@@ -1,6 +1,8 @@
 # Darb — development notes
 
-Single-file web app: everything (HTML, CSS, JS) is in `index.html`, plus PWA files: `manifest.webmanifest`, `sw.js` (service worker) and `icons/`. No build step, no dependencies to install. Deployed by GitHub Pages from the `main` branch root.
+Web app: all HTML, CSS and JS is in `index.html` (no build step for the website), plus PWA files (`manifest.webmanifest`, `sw.js`, `icons/`) and bundled libraries in `vendor/` (Leaflet 1.9.4, Tabler Icons webfont 3.49 — woff2 only, supabase-js 2.118 UMD). Deployed by GitHub Pages from the `main` branch root.
+
+The same `index.html` is packaged as an Android APK with Capacitor 8 (`android/`, `capacitor.config.json`, `scripts/build-www.mjs`) and an optional Supabase backend (`supabase/schema.sql`). User-facing setup steps are in `SETUP.md`.
 
 ## Code map (index.html)
 
@@ -19,13 +21,31 @@ Single-file web app: everything (HTML, CSS, JS) is in `index.html`, plus PWA fil
 
 ## PWA
 
-- `sw.js` precaches the app shell and the Leaflet / Tabler CDN files; pages are network-first, static files stale-while-revalidate. Tiles and API calls are never intercepted.
+- `sw.js` precaches the app shell and `vendor/`; pages are network-first, same-origin static files stale-while-revalidate. Tiles and API calls (including Supabase) are never intercepted. Not registered inside the APK.
 - **Bump `VERSION` in `sw.js`** whenever `sw.js` or its precache lists change. `index.html` changes need no bump (network-first).
 - `beforeinstallprompt` is stored in `installEvt`; Settings shows an Install app button while it's available.
+
+## Cloud (Supabase)
+
+- Config: `SB_URL` / `SB_KEY` (publishable key) near the top of the script. Both empty → `CLOUD=false` and every cloud feature is hidden (device-only mode). The app must keep working fully in that mode.
+- The app only calls RPC functions: `get_traffic`, `get_reports` (anon OK), `submit_traffic`, `add_report`, `remove_report` (signed in). Tables have RLS on with no policies. Change `supabase/schema.sql` and tell the user to re-run it in the SQL Editor (it's idempotent).
+- Auth: Google via `signInWithOAuth`, PKCE. Web redirects back to the page; the APK opens the system browser (`Browser` plugin) and returns via `darb://auth` (`appUrlOpen` → `finishAppSignIn`).
+- Traffic: `sampleTraffic()` (on each GPS fix) queues the 45–90 s average speed every 10 s while driving; `flushTraffic()` sends batches every 30 s. Grid is 0.0015° cells × 8 heading buckets, same formula on client (`cellKey`) and server. `trafLevel()`: 0 flowing, 1 slow, 2 jam.
+- Reports: local ones have ids `r…`; shared ones have `remote:true` and `mine`. Only local ones go to `localStorage`.
+
+## Android (Capacitor)
+
+- `NATIVE` is true inside the APK. Native plugins are reached with `Capacitor.registerPlugin(name)` — no bundler: `TextToSpeech` (speechSynthesis doesn't exist in Android WebView), `KeepAwake`, `App` (back button, deep links), `Browser`.
+- `npm run sync` = build `www/` (esbuild lowers JS to chrome60) + `npx cap sync android`. `www/`, `android/app/src/main/assets/public` and `capacitor-cordova-android-plugins` are generated, not committed.
+- App id `iq.layth.darb` — never change it (installed apps would stop updating).
+- Signing: `android/release.keystore.enc` (AES-256, pbkdf2 200k) + GitHub secret `DARB_KEYSTORE_PASSWORD`. Never commit a plaintext keystore. Version code = workflow run number.
+- After adding a Capacitor plugin: add it to `package.json` (exact version), run `npm install` and `npx cap sync android`, commit `android/` changes.
 
 ## Conventions
 
 - Escape any external text with `esc()` before inserting into HTML.
 - Network calls go through `fetchT(url, ms, opt)` (timeout + abort).
-- Keep it dependency-free and single-file unless there's a strong reason to split.
+- Keep the web app single-file; update a vendored library by replacing its file in `vendor/` and bumping `VERSION` in `sw.js`.
+- Every new Tabler icon name must exist in `vendor/tabler/tabler-icons.min.css`.
+- Test the web app with a headless browser (Playwright is available) — mock Supabase for cloud features.
 - Test on a phone over https (GitHub Pages) — GPS, voice, and wake lock need a secure context.
