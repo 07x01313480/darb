@@ -685,7 +685,7 @@ if(CLOUD)sb.auth.onAuthStateChange((ev,session)=>{const was=user;user=session?se
 // ── Car dashboard (BYD instrument cluster), APK only ──
 // Turn arrows go through BYD's built-in AMap adapter; the map is a second copy of this page (?cluster=1)
 // shown on the cluster's projection screen. Both are silently skipped on devices without them.
-let dashRoute=0,dashSentRoute=-1,dashT=0,dashLast='',dashMap=false,dashInset=null,dashInfo=null;
+let dashRoute=0,dashSentRoute=-1,dashRouteT=0,dashT=0,dashLast='',dashMap=false,dashInset=null,dashInfo=null;
 const AMAP_TURN={left:2,right:3,'slight left':4,'slight right':5,'sharp left':6,'sharp right':7,uturn:8,straight:9};
 // AMap NEW_ICON code (+ roundabout exit) for an OSRM step. Iraq drives on the right: anticlockwise roundabouts.
 function amapIcon(s){const ty=s.maneuver.type,m=s.maneuver.modifier||'straight';
@@ -708,7 +708,8 @@ function dashUpdate(k,dNext,rem){if(!DASH||S.dash==='off'||!nav.r)return;const r
 function dashPush(){if(!dashMap||!DASH)return;const r=nav.r,k=nav.k,s=r&&r.steps[k],d=r?Math.max(0,r.sa[k]-nav.along):0;
  const st={me,head:meHead,speed:meSpeed,z:meSpeed>22?15:meSpeed>12?16:17,lang:S.lang,dark:document.body.classList.contains('dark'),map3d:S.map3d!==false,inset:dashInset,
   dest:dest?[dest.lat,dest.lng]:null,banner:s?{icon:mIcon(s),text:instr(s),dist:fmtDist(d)}:null};
- if(r&&dashSentRoute!==dashRoute){dashSentRoute=dashRoute;st.rv=dashRoute;st.route={ll:r.ll,runs:trafIdx.size?routeRuns(r):[]}}
+ // The route is re-sent every 10 s: while the dashboard page is still loading, only the latest message survives.
+ if(r&&(dashSentRoute!==dashRoute||Date.now()-dashRouteT>10000)){dashSentRoute=dashRoute;dashRouteT=Date.now();st.rv=dashRoute;st.route={ll:r.ll,runs:trafIdx.size?routeRuns(r):[]}}
  DASH.update(st).catch(()=>{})}
 function dashEnd(){if(!DASH)return;DASH.end().catch(()=>{});if(dashMap){dashMap=false;DASH.hideMap().catch(()=>{})}}
 async function dashCheck(){if(!DASH)return;try{dashInfo=await DASH.info()}catch(e){dashInfo={error:String(e&&e.message||e)}}if(sheetState==='settings')sheet('settings')}
@@ -817,10 +818,10 @@ if(CLUSTER){
   document.body.classList.toggle('dark',!!s.dark);M.theme(!!s.dark);
   if(s.inset){document.documentElement.style.setProperty('--ct',s.inset.top+'px');document.documentElement.style.setProperty('--cl',s.inset.left+'px')}
   if(!started){started=true;S.map3d=s.map3d!==false;M.start(S.map3d).then(camera)} // first frame arrives before the engine is ready
-  if(s.route&&s.rv!==rv){rv=s.rv;M.routes([s.route.ll],0,s.route.runs||[])}
+  if(s.route&&(s.rv!==rv||!M._st.routes.length)){rv=s.rv;M.routes([s.route.ll],0,s.route.runs||[])}
   if(s.dest)M.marker('dest',{ll:s.dest,html:'<div class="pin"></div>',size:[30,30],anchor:'bottom',lift:6,z:500});
   if(s.me){me=s.me;meHead=s.head;meSpeed=s.speed||0;meAcc=0;drawMe();M.follow(me,s.z||17,meHead,true,S.map3d!==false)}
-  const b=$('#banner');b.hidden=!s.banner;if(s.banner){$('#bi').className='ti '+s.banner.icon;$('#bd').textContent=s.banner.dist;$('#btext').textContent=s.banner.text;$('#bnext').hidden=true}};
+  $('#banner').hidden=true}; // the car's own guidance card shows the next turn on the cluster
  applyLang();
 }else{
 M.start(S.map3d!==false).then(n=>{if(S.map3d!==false&&n!=='gl'&&!LS.get('no3dTold',false)){toast(t('no3d'),4500);LS.set('no3dTold',true)}});
